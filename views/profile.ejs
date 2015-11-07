@@ -1,13 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" ng-app="rehearse">
   <head>
     <% include header.ejs %>
     <title>Rehearse</title>
+    <script src="/script/stats.js"></script>
   </head>
   <body>
     <% include navbar.ejs %>
     <div class="container-fluid" id="main">
       <h1>User Profile</h1>
+      <div id="stats-section" ng-controller="Stats as stats">
+      </div>
     </div>
     <% include scripts.ejs %>
   </body>

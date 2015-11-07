@@ -29,7 +29,7 @@ router.route('/')
     }
   });
 
-router.route('/newuser')
+router.route('/register')
   .get(function (req, res) {
     res.render('register');
   })

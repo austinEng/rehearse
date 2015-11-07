@@ -4,5 +4,6 @@
 		"url": "",
 		"username": "",
 		"password": ""
-	}
+	},
+	"cookie_secret":""
 }

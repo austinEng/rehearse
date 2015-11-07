@@ -1,4 +1,4 @@
-var mongoose = require('mongoose');
+/*var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost:27017/speechanalyzer', function (err) {
   if (err && err.message === 'connect ECONNREFUSED') {
     console.log('Error connecting to mongodb database: %s.\nIs "mongod" running?', err.message);
@@ -25,3 +25,4 @@ module.exports = {
   mongoose: mongoose,
   db: db.collection('User')
 }
+*/
