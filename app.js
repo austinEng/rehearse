@@ -12,7 +12,7 @@ var config = require('./config.js');
 var authService = watson.authorization(config.watson);
 
 var app = express();
-app.set('view engine', 'jade');
+app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -36,6 +36,10 @@ mongoose.connect(process.env.MONGOLAB_URI || 'mongodb://localhost:27017/speechan
 
     app.get('/', function(req, res, next) {
         res.render('index', { ct: req._csrfToken });
+    });
+
+    app.get('/login', function(req, res, next) {
+        res.render('login');
     });
 
     app.post('/api/token', function(req, res, next) {
