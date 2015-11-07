@@ -25,14 +25,12 @@ var processMetadata = function (req, res, next) {
 };
 
 router.post('/', function(req, res, next) {
-	console.log('Received chunk ' + req.body.hash);
 	if (req.body.finished==false) {		// request isn't finished yet!
 	  	dataCache.get(req.body.hash, function (err, value) {
 			if (err) {
 				res.sendStatus(500);
 			}
 			if (typeof(value) === "undefined") {
-				console.log("Initializing chunk " + req.body.hash);
 				dataCache.set(req.body.hash, req.body, function (err, success) {
 					if (err) {
 						res.sendStatus(500);
@@ -40,7 +38,6 @@ router.post('/', function(req, res, next) {
 					res.sendStatus(200);
 				});
 			} else {
-				console.log("Appending to chunk " + req.body.hash);
 				value.data = value.data.concat(req.body.data);
 				dataCache.set(req.body.hash, value, function (err, success) {
 					if (err) {
