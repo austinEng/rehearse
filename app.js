@@ -2,22 +2,27 @@
 var logger = require('morgan');
 var lessMiddleware = require('less-middleware');
 var express = require('express');
+var session = require('express-session');
 var watson = require('watson-developer-cloud');
 var path = require('path');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
-var cookieSession = require('cookie-session');
-var uuid = require('node-uuid');
+var cookieParser = require('cookie-parser');
+var passport = require('passport');
+var flash = require('connect-flash');
 
 var config = require('./config.js');
+var app = express();
+app.use(logger('dev'));
+app.set('port', process.env.PORT || 3000);
 
 var authService = watson.authorization(config.watson);
 
-var app = express();
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(session({secret: config.cookie_secret, saveUninitialized: true, resave: true}));
 app.use(express.static(path.join(__dirname, '/public')));
 app.use(lessMiddleware(path.join(__dirname, 'source', 'less'), {
     dest: path.join(__dirname, 'public'),
@@ -27,39 +32,34 @@ app.use(lessMiddleware(path.join(__dirname, 'source', 'less'), {
         }
     }
 }));
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(flash());
 
-var generateCookieSecret = function () {
-  return 'iamasecret' + uuid.v4();
-}
 
-app.use(cookieSession({
-  secret: generateCookieSecret()
-}));
+app.use('/', require('./routes/router'));
 
-// Middlewares
-var processMetadata = require('./middlewares/processMetadata');
-
-// Routes
-var login = require('./routes/login');
-var about = require('./routes/about');
-
-    app.use('/login', login);
-    app.use('/about', about);
-
-    app.get('/', function(req, res, next) {
-        res.render('index', { ct: req._csrfToken });
+app.post('/api/token', function(req, res, next) {
+    authService.getToken({url: config.watson.url}, function(err, token) {
+        if (err)
+            next(err);
+        else
+            res.send(token);
     });
+});
 
-    app.post('/api/token', function(req, res, next) {
-        authService.getToken({url: config.watson.url}, function(err, token) {
-            if (err)
-                next(err);
-            else
-                res.send(token);
-        });
+mongoose.connect('mongodb://localhost:27017/speechanalyzer', function (err) {
+  if (err && err.message === 'connect ECONNREFUSED') {
+    console.log('Error connecting to mongodb database: %s.\nIs "mongod" running?', err.message);
+    process.exit(0);
+  } else if (err) {
+    throw err;
+  } else {
+    console.log('DB successfully connected.');
+    var server = app.listen(app.get('port'), function() {
+        console.log('Express server listening on port ' + server.address().port);
     });
-
-    app.use('/receivedata', processMetadata);
-
-    var port = process.env.PORT || 3000;
-    app.listen(port);
+  }
+});

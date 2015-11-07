@@ -1,30 +1,59 @@
-var mongo = require ('./mongo');
+"use strict";
+var mongoose = require('mongoose');
+var uniqueValidator = require('mongoose-unique-validator');
+var bcrypt = require("bcryptjs");
 
-module.exports = {
-  createUser: function (username, password, callback) {
-    var user = new mongo.User({username: username, password: password});
-    console.log('Saving user');
-    user.save(function (error, username) {
-      callback(error, username);
-    });
+
+var UserSchema = new mongoose.Schema({
+  username: {
+    type: String,
+    required: true,
+    index: true,
+    unique: true
   },
-
-  containsUser: function (username, password, callback) {
-    console.log('Checking if database contains user: %s', username);
-    mongo.User.find({username: username, password: password}, function (error, result) {
-      if (error) {
-        callback(error);
-      } else {
-        callback(null, result);
-      }
-    });
+  password: {
+    type: String,
+    required: true
   },
-
-  getAllUsers: function (callback) {
-    mongo.User.find(callback);
-  },
-
-  destroy: function (callback) {
-    mongo.User.remove({}, callback);
+  salt: {
+    type: String
   }
+});
+
+UserSchema.plugin(uniqueValidator);
+
+UserSchema.pre('save', function (next) {
+  var user = this;
+  if (this.isModified('password') || this.isNew) {
+    bcrypt.genSalt(10, function (err, salt) {
+      if (err) {
+        return next(err);
+      }
+      bcrypt.hash(user.password, salt, function (err, hash) {
+        if (err) {
+          return next(err);
+        }
+        user.password = hash;
+        user.salt = salt;
+        next();
+      });
+    });
+  } else {
+    return next();
+  }
+});
+
+UserSchema.plugin(uniqueValidator);
+
+UserSchema.methods.comparePassword = function (passw, cb) {
+  var that = this;
+  bcrypt.hash(passw, this.salt, function (err, hash) {
+    if (err) {
+      return cb(err);
+    }
+    cb(null, hash == that.password);
+  });
 };
+
+
+module.exports = mongoose.model('User', UserSchema);

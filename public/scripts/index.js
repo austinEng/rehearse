@@ -360,7 +360,6 @@ $(document).ready(function() {
 
 },{"./prompt":3,"./recorder":4,"./utils":6}],3:[function(require,module,exports){
 exports.generatePrompt = function () {
-  console.log('Hello from generatePrompt');
   return 'Hello from generatePrompt';
 };
 
