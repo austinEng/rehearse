@@ -298,257 +298,7 @@ Microphone.prototype.onStopRecording =  function() {};
 Microphone.prototype.onAudio =  function() {};
 
 module.exports = Microphone;
-},{"./utils":8}],2:[function(require,module,exports){
-module.exports={
-   "models": [
-      {
-         "url": "https://stream.watsonplatform.net/speech-to-text/api/v1/models/en-US_BroadbandModel",
-         "rate": 16000,
-         "name": "en-US_BroadbandModel",
-         "language": "en-US",
-         "description": "US English broadband model (16KHz)"
-      },
-      {
-         "url": "https://stream.watsonplatform.net/speech-to-text/api/v1/models/en-US_NarrowbandModel",
-         "rate": 8000,
-         "name": "en-US_NarrowbandModel",
-         "language": "en-US",
-         "description": "US English narrowband model (8KHz)"
-      },
-      {
-         "url": "https://stream.watsonplatform.net/speech-to-text/api/v1/models/es-ES_BroadbandModel",
-         "rate": 16000,
-         "name": "es-ES_BroadbandModel",
-         "language": "es-ES",
-         "description": "Spanish broadband model (16KHz)"
-      },
-      {
-         "url": "https://stream.watsonplatform.net/speech-to-text/api/v1/models/es-ES_NarrowbandModel",
-         "rate": 8000,
-         "name": "es-ES_NarrowbandModel",
-         "language": "es-ES",
-         "description": "Spanish narrowband model (8KHz)"
-      },
-      {
-         "url": "https://stream.watsonplatform.net/speech-to-text/api/v1/models/pt-BR_BroadbandModel",
-         "rate": 16000,
-         "name": "pt-BR_BroadbandModel",
-         "language": "pt-BR",
-         "description": "Brazilian Portuguese broadband model (16KHz)"
-      },
-      {
-         "url": "https://stream.watsonplatform.net/speech-to-text/api/v1/models/pt-BR_NarrowbandModel",
-         "rate": 8000,
-         "name": "pt-BR_NarrowbandModel",
-         "language": "pt-BR",
-         "description": "Brazilian Portuguese narrowband model (8KHz)"
-      },
-      {
-         "url": "https://stream.watsonplatform.net/speech-to-text/api/v1/models/zh-CN_BroadbandModel",
-         "rate": 16000,
-         "name": "zh-CN_BroadbandModel",
-         "language": "zh-CN",
-         "description": "Mandarin broadband model (16KHz)"
-      },
-      {
-         "url": "https://stream.watsonplatform.net/speech-to-text/api/v1/models/zh-CN_NarrowbandModel",
-         "rate": 8000,
-         "name": "zh-CN_NarrowbandModel",
-         "language": "zh-CN",
-         "description": "Mandarin narrowband model (8KHz)"
-      }
-   ]
-}
-
-},{}],3:[function(require,module,exports){
-/**
- * Copyright 2015 IBM Corp. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/* global $ */
-'use strict';
-
-var display = require('./views/displaymetadata');
-var initSocket = require('./socket').initSocket;
-
-exports.handleFileUpload = function(type, token, model, file, contentType, callback, onend) {
-
-    // Set currentlyDisplaying to prevent other sockets from opening
-    localStorage.setItem('currentlyDisplaying', type);
-
-    // $('#progressIndicator').css('visibility', 'visible');
-
-    $.subscribe('progress', function(evt, data) {
-      console.log('progress: ', data);
-    });
-
-    console.log('contentType', contentType);
-
-    var baseString = '';
-    var baseJSON = '';
-
-    $.subscribe('showjson', function() {
-      var $resultsJSON = $('#resultsJSON');
-      $resultsJSON.empty();
-      $resultsJSON.append(baseJSON);
-    });
-
-    var options = {};
-    options.token = token;
-    options.message = {
-      'action': 'start',
-      'content-type': contentType,
-      'interim_results': true,
-      'continuous': true,
-      'word_confidence': true,
-      'timestamps': true,
-      'max_alternatives': 3,
-      'inactivity_timeout': 600
-    };
-    options.model = model;
-
-    function onOpen() {
-      console.log('Socket opened');
-    }
-
-    function onListening(socket) {
-      console.log('Socket listening');
-      callback(socket);
-    }
-
-    function onMessage(msg) {
-      if (msg.results) {
-        // Convert to closure approach
-        baseString = display.showResult(msg, baseString, model);
-        baseJSON = display.showJSON(msg, baseJSON);
-      }
-    }
-
-    function onError(evt) {
-      localStorage.setItem('currentlyDisplaying', 'false');
-      onend(evt);
-      console.log('Socket err: ', evt.code);
-    }
-
-    function onClose(evt) {
-      localStorage.setItem('currentlyDisplaying', 'false');
-      onend(evt);
-      console.log('Socket closing: ', evt);
-    }
-
-    initSocket(options, onOpen, onListening, onMessage, onError, onClose);
-};
-
-},{"./socket":7,"./views/displaymetadata":10}],4:[function(require,module,exports){
-/**
- * Copyright 2015 IBM Corp. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/* global $ */
-'use strict';
-
-var initSocket = require('./socket').initSocket;
-var display = require('./views/displaymetadata');
-
-exports.handleMicrophone = function(token, model, mic, callback) {
-
-  if (model.indexOf('Narrowband') > -1) {
-    var err = new Error('Microphone transcription cannot accomodate narrowband models, '+
-      'please select another');
-    callback(err, null);
-    return false;
-  }
-
-  $.publish('clearscreen');
-
-  // Test out websocket
-  var baseString = '';
-  var baseJSON = '';
-
-  $.subscribe('showjson', function() {
-    var $resultsJSON = $('#resultsJSON');
-    $resultsJSON.empty();
-    $resultsJSON.append(baseJSON);
-  });
-
-  var options = {};
-  options.token = token;
-  options.message = {
-    'action': 'start',
-    'content-type': 'audio/l16;rate=16000',
-    'interim_results': true,
-    'continuous': true,
-    'word_confidence': true,
-    'timestamps': true,
-    'max_alternatives': 3,
-    'inactivity_timeout': 600
-  };
-  options.model = model;
-
-  var results = [];
-
-  function onOpen(socket) {
-    console.log('Mic socket: opened');
-    callback(null, socket);
-  }
-
-  function onListening(socket) {
-
-    mic.onAudio = function(blob) {
-      if (socket.readyState < 2) {
-        socket.send(blob);
-      }
-    };
-  }
-
-  function onMessage(msg) {
-    if (msg.results) {
-      results.push(msg);
-      baseString = display.showResult(msg, baseString, model);
-      baseJSON = display.showJSON(msg, baseJSON);
-    }
-  }
-
-  function onError() {
-    console.log('Mic socket err: ', err);
-  }
-
-  function onClose(evt) {
-    console.log(results);
-    $.ajax({
-      type: "POST",
-      url: "/receivedata",
-      data: { data: results }
-    });
-    console.log('Mic socket close: ', evt);
-  }
-
-  initSocket(options, onOpen, onListening, onMessage, onError, onClose);
-};
-
-},{"./socket":7,"./views/displaymetadata":10}],5:[function(require,module,exports){
+},{"./utils":5}],2:[function(require,module,exports){
 /**
  * Copyright 2015 IBM Corp. All Rights Reserved.
  *
@@ -568,13 +318,9 @@ exports.handleMicrophone = function(token, model, mic, callback) {
 
 'use strict';
 
-var models = require('./data/models.json').models;
 var utils = require('./utils');
 utils.initPubSub();
-var initViews = require('./views').initViews;
-var showerror = require('./views/showerror');
-var showError = showerror.showError;
-var getModels = require('./models').getModels;
+var Recorder = require('./recorder');
 
 window.BUFFERSIZE = 8192;
 
@@ -592,98 +338,147 @@ $(document).ready(function() {
       console.error('Attempting to reconnect...');
 
       if (err && err.code)
-        showError('Server error ' + err.code + ': '+ err.error);
+        console.error('Server error ' + err.code + ': '+ err.error);
       else
-        showError('Server error ' + err.code + ': please refresh your browser and try again');
+        console.error('Server error ' + err.code + ': please refresh your browser and try again');
     }
 
-    var viewContext = {
+    var context = {
       currentModel: 'en-US_BroadbandModel',
-      models: models,
       token: token,
       bufferSize: BUFFERSIZE
     };
 
-    initViews(viewContext);
-
-    // Save models to localstorage
-    localStorage.setItem('models', JSON.stringify(models));
-
-    // Set default current model
-    localStorage.setItem('currentModel', 'en-US_BroadbandModel');
-    localStorage.setItem('sessionPermissions', 'true');
-    
-    getModels(token);
-    
-    $.subscribe('clearscreen', function() {
-      $('#resultsText').text('');
-      $('#resultsJSON').text('');
-      $('.error-row').hide();
-      $('.notification-row').hide();
-      $('.hypotheses > ul').empty();
-      $('#metadataTableBody').empty();
-    });
+    Recorder.initRecorder(context);
 
   });
 
 });
 
-},{"./data/models.json":2,"./models":6,"./utils":8,"./views":14,"./views/showerror":19}],6:[function(require,module,exports){
-/**
- * Copyright 2015 IBM Corp. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-'use strict';
-var selectModel = require('./views/selectmodel').initSelectModel;
+},{"./recorder":3,"./utils":5}],3:[function(require,module,exports){
+var Microphone = require('./Microphone');
+var initSocket = require('./socket').initSocket;
 
-exports.getModels = function(token) {
-  var viewContext = {
-    currentModel: 'en-US_BroadbandModel',
-    models: null,
-    token: token,
-    bufferSize: BUFFERSIZE
-  };
-  var modelUrl = 'https://stream.watsonplatform.net/speech-to-text/api/v1/models';
-  var sttRequest = new XMLHttpRequest();
-  sttRequest.open('GET', modelUrl, true);
-  sttRequest.withCredentials = true;
-  sttRequest.setRequestHeader('Accept', 'application/json');
-  sttRequest.setRequestHeader('X-Watson-Authorization-Token', token);
-  sttRequest.onload = function() {
-    var response = JSON.parse(sttRequest.responseText);
-    var sorted = response.models.sort(function(a,b) {
-    if(a.name > b.name) {
-      return 1;
-    }
-    if( a.name < b.name) {
-      return -1;
-    }
-    return 0;
-    });
-    response.models=sorted;
-    localStorage.setItem('models', JSON.stringify(response.models));
-    viewContext.models = response.models;
-    selectModel(viewContext);
-  };
-  sttRequest.onerror = function() {
-    viewContext.models = require('./data/models.json').models;
-    selectModel(viewContext);
-  };
-  sttRequest.send();
-};
+exports.initRecorder = function(ctx) {
+	var recordButton = $('#recordButton');
 
-},{"./data/models.json":2,"./views/selectmodel":17}],7:[function(require,module,exports){
+	recordButton.click((function() {
+		var running = false;
+	    var token = ctx.token;
+	    var micOptions = {
+	    	bufferSize: ctx.buffersize
+	    };
+	    var mic = new Microphone(micOptions);
+
+	    return function(evt) {
+	    	if (!running) {
+	    		console.log("Initializing recorder");
+	    		initializeRecording(token, mic, function(err) {
+	    			if (err) {
+	    				console.log("Couldn't start recorder");
+	    				console.log('Error: ' + err.message);
+	    				running = false;
+	    			} else {
+	    				console.log("Starting record");
+			    		mic.record();
+			    		running = true;
+	    			}
+	    		});
+	    	} else {
+	    		console.log("Stopping record");
+	    		$.publish('hardsocketstop');
+	    		mic.stop();
+	    		running = false;
+	    	}
+	    }
+	})());
+}
+
+var initializeRecording = function(token, mic, callback) {
+	var options = {};
+	options.token = token;
+	options.message = {
+		'action': 'start',
+		'content-type': 'audio/l16;rate=16000',
+		'interim_results': true,
+		'continuous': true,
+		'word_confidence': true,
+		'timestamps': true,
+		'max_alternatives': 3,
+		'inactivity_timeout': 600
+	};
+	options.model = 'en-US_BroadbandModel';
+
+	var results = [];
+	var hash = Math.random().toString(36).substring(2);
+
+	function onOpen(socket) {
+	    console.log('Mic socket: opened');
+	    callback(null, socket);
+	}
+
+	function onListening(socket) {
+
+	    mic.onAudio = function(blob) {
+	    	if (socket.readyState < 2) {
+	        	socket.send(blob);
+	    	}
+	    };
+	}
+
+	function onMessage(msg) {
+	    if (msg.results) {
+	    	console.log(msg.results[0].alternatives[0].transcript);
+	    	results.push(msg);
+
+	    	if (results.length > 0) {
+	    		var json = { 
+		    		hash: hash,
+		    		data: results,
+		    		finished: false
+		    	};
+	    		$.ajax({
+			    	type: "POST",
+			    	url: "/receivedata",
+			    	async: true,
+			    	dataType: 'json',
+			    	contentType: 'application/json',
+			    	data: JSON.stringify(json),
+			    	success: function(data) {
+			    		results = [];
+			    	}
+			    });
+	    	}
+	    }
+	}
+
+	function onError() {
+	    console.log('Mic socket err: ', err);
+	}
+
+	function onClose(evt) {
+	    console.log(results);
+	    var json = { 
+    		hash: hash,
+    		data: results,
+    		finished: true
+    	};
+	    $.ajax({
+	    	type: "POST",
+	    	url: "/receivedata",
+	    	dataType: 'json',
+	    	contentType: 'application/json',
+	    	data: JSON.stringify(json),
+	    	success: function(data) {
+
+	    	}
+	    });
+	    console.log('Mic socket close: ', evt);
+	}
+
+	initSocket(options, onOpen, onListening, onMessage, onError, onClose);
+}
+},{"./Microphone":1,"./socket":4}],4:[function(require,module,exports){
 /**
  * Copyright 2015 IBM Corp. All Rights Reserved.
  *
@@ -704,8 +499,6 @@ exports.getModels = function(token) {
 'use strict';
 
 var utils = require('./utils');
-var showerror = require('./views/showerror');
-var showError = showerror.showError;
 
 // Mini WS callback API, so we can initialize
 // with model and token in URI, plus
@@ -751,7 +544,7 @@ var initSocket = exports.initSocket = function(options, onopen, onlistening, onm
   socket.onmessage = function(evt) {
     var msg = JSON.parse(evt.data);
     if (msg.error) {
-      showError(msg.error);
+      console.error(msg.error);
       $.publish('hardsocketstop');
       return;
     }
@@ -770,7 +563,7 @@ var initSocket = exports.initSocket = function(options, onopen, onlistening, onm
 
   socket.onerror = function(evt) {
     console.log('WS onerror: ', evt);
-    showError('Application error ' + evt.code + ': please refresh your browser and try again');
+    console.error('Application error ' + evt.code + ': please refresh your browser and try again');
     $.publish('clearscreen');
     onerror(evt);
   };
@@ -811,7 +604,7 @@ var initSocket = exports.initSocket = function(options, onopen, onlistening, onm
 
 };
 
-},{"./utils":8,"./views/showerror":19}],8:[function(require,module,exports){
+},{"./utils":5}],5:[function(require,module,exports){
 (function (global){
 /**
  * Copyright 2015 IBM Corp. All Rights Reserved.
@@ -833,56 +626,6 @@ var initSocket = exports.initSocket = function(options, onopen, onlistening, onm
 
 // For non-view logic
 var $ = (typeof window !== "undefined" ? window['jQuery'] : typeof global !== "undefined" ? global['jQuery'] : null);
-
-var fileBlock = function(_offset, length, _file, readChunk) {
-  var r = new FileReader();
-  var blob = _file.slice(_offset, length + _offset);
-  r.onload = readChunk;
-  r.readAsArrayBuffer(blob);
-};
-
-// Based on alediaferia's SO response
-// http://stackoverflow.com/questions/14438187/javascript-filereader-parsing-long-file-in-chunks
-exports.onFileProgress = function(options, ondata, running, onerror, onend, samplingRate) {
-  var file       = options.file;
-  var fileSize   = file.size;
-  var chunkSize  = options.bufferSize || 16000;  // in bytes
-  var offset     = 0;
-  var readChunk = function(evt) {
-    if (offset >= fileSize) {
-      console.log('Done reading file');
-      onend();
-      return;
-    }
-    if(!running()) {
-      return;
-    }
-    if (evt.target.error == null) {
-      var buffer = evt.target.result;
-      var len = buffer.byteLength;
-      offset += len;
-      //console.log('sending: ' + len);
-      ondata(buffer); // callback for handling read chunk
-    } else {
-      var errorMessage = evt.target.error;
-      console.log('Read error: ' + errorMessage);
-      onerror(errorMessage);
-      return;
-    }
-    // use this timeout to pace the data upload for the playSample case,
-    // the idea is that the hyps do not arrive before the audio is played back
-    if (samplingRate) {
-    	// console.log('samplingRate: ' +
-      //  samplingRate + ' timeout: ' + (chunkSize * 1000) / (samplingRate * 2));
-    	setTimeout(function() {
-    	  fileBlock(offset, chunkSize, file, readChunk);
-    	}, (chunkSize * 1000) / (samplingRate * 2));
-    } else {
-      fileBlock(offset, chunkSize, file, readChunk);
-    }
-  };
-  fileBlock(offset, chunkSize, file, readChunk);
-};
 
 exports.createTokenGenerator = function() {
   // Make call to API to try and get token
@@ -931,6 +674,7 @@ exports.initPubSub = function() {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+<<<<<<< HEAD
 },{}],9:[function(require,module,exports){
 /**
  * Copyright 2014 IBM Corp. All Rights Reserved.
@@ -1909,3 +1653,6 @@ exports.initShowTab = function() {
 console.log('Index.js loaded');
 
 },{}]},{},[5]);
+=======
+},{}]},{},[2]);
+>>>>>>> 4e3c62b619afd004a8f1ce03223392a92d4a0bf8

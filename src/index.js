@@ -17,13 +17,9 @@
 
 'use strict';
 
-var models = require('./data/models.json').models;
 var utils = require('./utils');
 utils.initPubSub();
-var initViews = require('./views').initViews;
-var showerror = require('./views/showerror');
-var showError = showerror.showError;
-var getModels = require('./models').getModels;
+var Recorder = require('./recorder');
 
 window.BUFFERSIZE = 8192;
 
@@ -41,37 +37,18 @@ $(document).ready(function() {
       console.error('Attempting to reconnect...');
 
       if (err && err.code)
-        showError('Server error ' + err.code + ': '+ err.error);
+        console.error('Server error ' + err.code + ': '+ err.error);
       else
-        showError('Server error ' + err.code + ': please refresh your browser and try again');
+        console.error('Server error ' + err.code + ': please refresh your browser and try again');
     }
 
-    var viewContext = {
+    var context = {
       currentModel: 'en-US_BroadbandModel',
-      models: models,
       token: token,
       bufferSize: BUFFERSIZE
     };
 
-    initViews(viewContext);
-
-    // Save models to localstorage
-    localStorage.setItem('models', JSON.stringify(models));
-
-    // Set default current model
-    localStorage.setItem('currentModel', 'en-US_BroadbandModel');
-    localStorage.setItem('sessionPermissions', 'true');
-    
-    getModels(token);
-    
-    $.subscribe('clearscreen', function() {
-      $('#resultsText').text('');
-      $('#resultsJSON').text('');
-      $('.error-row').hide();
-      $('.notification-row').hide();
-      $('.hypotheses > ul').empty();
-      $('#metadataTableBody').empty();
-    });
+    Recorder.initRecorder(context);
 
   });
 

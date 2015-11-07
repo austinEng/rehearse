@@ -67,7 +67,7 @@ var about = require('./routes/about');
         });
     });
 
-    app.post('/receivedata', processMetadata);
+    app.use('/receivedata', require('./middlewares/processMetadata'));
 
     var port = process.env.PORT || 3000;
     app.listen(port);
