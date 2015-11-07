@@ -1,0 +1,29 @@
+{
+  "name": "Rehearse",
+  "dependencies": {
+    "body-parser": "^1.14.1",
+    "browserify": "^12.0.1",
+    "browserify-shim": "^3.8.11",
+    "express": "^4.13.3",
+    "jade": "^1.11.0",
+    "jquery": "^2.1.4",
+    "less-middleware": "^2.0.1",
+    "mongoose": "^4.2.4",
+    "morgan": "^1.6.1",
+    "path": "^0.12.7",
+    "uglifyjs": "^2.4.10",
+    "watson-developer-cloud": "^0.10.6"
+  },
+  "browserify-shim": {
+    "jquery": "global:jQuery"
+  },
+  "browserify": {
+    "transform": [
+      "browserify-shim"
+    ]
+  },
+  "scripts": {
+    "start": "node app.js",
+    "build": "browserify src/index.js > public/scripts/index.js"
+  }
+}
