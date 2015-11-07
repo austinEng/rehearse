@@ -6,6 +6,7 @@ var watson = require('watson-developer-cloud');
 var path = require('path');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
+var processMetadata = require('./middlewares/processMetadata');
 
 var config = require('./config.js');
 
@@ -51,9 +52,7 @@ mongoose.connect(process.env.MONGOLAB_URI || 'mongodb://localhost:27017/speechan
         });
     });
 
-    app.post('/receivedata', function(req, res, next) {
-        console.log(req);
-    });
+    app.post('/receivedata', processMetadata);
 
     var port = process.env.PORT || 3000;
     app.listen(port);
