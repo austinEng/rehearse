@@ -20,6 +20,7 @@
 var utils = require('./utils');
 utils.initPubSub();
 var Recorder = require('./recorder');
+var generatePrompt = require('./prompt').generatePrompt;
 
 window.BUFFERSIZE = 8192;
 
@@ -47,6 +48,8 @@ $(document).ready(function() {
       token: token,
       bufferSize: BUFFERSIZE
     };
+
+    $('#prompt').text(generatePrompt);
 
     Recorder.initRecorder(context);
 

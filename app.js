@@ -38,7 +38,6 @@ app.use(cookieSession({
 
 // Middlewares
 var processMetadata = require('./middlewares/processMetadata');
-var generatePrompt = require('./middlewares/generatePrompt');
 
 // Routes
 var login = require('./routes/login');
@@ -50,8 +49,6 @@ var about = require('./routes/about');
     app.get('/', function(req, res, next) {
         res.render('index', { ct: req._csrfToken });
     });
-
-    app.use('/', generatePrompt);
 
     app.post('/api/token', function(req, res, next) {
         authService.getToken({url: config.watson.url}, function(err, token) {

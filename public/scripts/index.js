@@ -298,7 +298,7 @@ Microphone.prototype.onStopRecording =  function() {};
 Microphone.prototype.onAudio =  function() {};
 
 module.exports = Microphone;
-},{"./utils":5}],2:[function(require,module,exports){
+},{"./utils":6}],2:[function(require,module,exports){
 /**
  * Copyright 2015 IBM Corp. All Rights Reserved.
  *
@@ -321,6 +321,7 @@ module.exports = Microphone;
 var utils = require('./utils');
 utils.initPubSub();
 var Recorder = require('./recorder');
+var generatePrompt = require('./prompt').generatePrompt;
 
 window.BUFFERSIZE = 8192;
 
@@ -349,13 +350,21 @@ $(document).ready(function() {
       bufferSize: BUFFERSIZE
     };
 
+    $('#prompt').text(generatePrompt);
+
     Recorder.initRecorder(context);
 
   });
 
 });
 
-},{"./recorder":3,"./utils":5}],3:[function(require,module,exports){
+},{"./prompt":3,"./recorder":4,"./utils":6}],3:[function(require,module,exports){
+exports.generatePrompt = function () {
+  console.log('Hello from generatePrompt');
+  return 'Hello from generatePrompt';
+};
+
+},{}],4:[function(require,module,exports){
 var Microphone = require('./Microphone');
 var initSocket = require('./socket').initSocket;
 
@@ -478,7 +487,7 @@ var initializeRecording = function(token, mic, callback) {
 
 	initSocket(options, onOpen, onListening, onMessage, onError, onClose);
 }
-},{"./Microphone":1,"./socket":4}],4:[function(require,module,exports){
+},{"./Microphone":1,"./socket":5}],5:[function(require,module,exports){
 /**
  * Copyright 2015 IBM Corp. All Rights Reserved.
  *
@@ -604,7 +613,7 @@ var initSocket = exports.initSocket = function(options, onopen, onlistening, onm
 
 };
 
-},{"./utils":5}],5:[function(require,module,exports){
+},{"./utils":6}],6:[function(require,module,exports){
 (function (global){
 /**
  * Copyright 2015 IBM Corp. All Rights Reserved.
