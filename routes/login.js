@@ -10,10 +10,10 @@ router.route('/')
     if (req.body.login) {
     var username = req.body.username;
     var password = req.body.password;
-    usersDb.containsUser(username, password, function (error, didAuthenticate) {
-      if (didAuthenticate) {
-        req.session.isAuthenticated = true;
-        res.send('Logged in!');
+    usersDb.containsUser(username, password, function (error, user) {
+      if (user) {
+        req.user = user;
+        res.send(user);
       } else {
         res.redirect('/login');
       }
@@ -41,7 +41,7 @@ router.route('/newuser')
         console.log(error);
       } else {
         console.log('Added %s to database!', username);
-        res.redirect('/users');
+        res.redirect('/login');
       }
     });
   });
