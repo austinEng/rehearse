@@ -28,14 +28,6 @@ app.use(lessMiddleware(path.join(__dirname, 'source', 'less'), {
     }
 }));
 
-
-// mongoose.connect(process.env.MONGOLAB_URI || 'mongodb://localhost:27017/speechanalyzer', function(err) {
-//     if(!err) {
-//         console.log('Connected to database');
-//     } else {
-//         return;
-//     }
-
 var generateCookieSecret = function () {
   return 'iamasecret' + uuid.v4();
 }
@@ -46,17 +38,20 @@ app.use(cookieSession({
 
 // Middlewares
 var processMetadata = require('./middlewares/processMetadata');
+var generatePrompt = require('./middlewares/generatePrompt');
 
 // Routes
 var login = require('./routes/login');
 var about = require('./routes/about');
 
     app.use('/login', login);
-    app.use('/', about);
+    app.use('/about', about);
 
     app.get('/', function(req, res, next) {
         res.render('index', { ct: req._csrfToken });
     });
+
+    app.use('/', generatePrompt);
 
     app.post('/api/token', function(req, res, next) {
         authService.getToken({url: config.watson.url}, function(err, token) {
@@ -67,9 +62,7 @@ var about = require('./routes/about');
         });
     });
 
-    app.use('/receivedata', require('./middlewares/processMetadata'));
+    app.use('/receivedata', processMetadata);
 
     var port = process.env.PORT || 3000;
     app.listen(port);
-// });
-
