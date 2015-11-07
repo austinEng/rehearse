@@ -5,7 +5,7 @@ var NodeCache = require( "node-cache" );
 var dataCache = new NodeCache();
 
 var processMetadata = function (req, res, next) {
-<<<<<<< HEAD
+
   console.log('Received data!');
   console.log(req.body);
   var final_results = [];
@@ -19,14 +19,8 @@ var processMetadata = function (req, res, next) {
   					final_results[i+1][0][0], (final_results[i+1][0][1]-
   					final_results[i][final_results[i].length][2])];
   }
-};
 
-module.exports = processMetadata;
-
-=======
-  	console.log(req.body);
-
-  	res.sendStatus(200);
+  res.sendStatus(200);
 };
 
 router.post('/', function(req, res, next) {
@@ -73,4 +67,3 @@ router.post('/', function(req, res, next) {
 });
 
 module.exports = router;
->>>>>>> origin/master
