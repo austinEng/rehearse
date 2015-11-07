@@ -26,7 +26,6 @@ router.post('/', function(req, res, next) {
 					res.sendStatus(200);
 				});
 			} else {
-				console.log(value);
 				console.log("Appending to chunk " + req.body.hash);
 				value.data = value.data.concat(req.body.data);
 				dataCache.set(req.body.hash, value, function (err, success) {

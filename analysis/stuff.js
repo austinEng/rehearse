@@ -1,0 +1,5 @@
+var data = [{ "results": [ { "alternatives": [ { "timestamps": [ [ "what's", 0.68, 1.02 ] ], "transcript": "what's " } ], "final": false } ], "result_index": 0 }, { "results": [ { "alternatives": [ { "timestamps": [ [ "Watson", 0.68, 1.12 ], [ "use", 1.12, 1.38 ] ], "transcript": "Watson use " } ], "final": false } ], "result_index": 0 },  { "results": [ { "alternatives": [ { "timestamps": [ [ "Watson", 0.68, 1.12 ], [ "you", 1.12, 1.25 ], [ "suck", 1.25, 1.71 ] ], "transcript": "Watson you suck " } ], "final": false } ], "result_index": 0 }, { "results": [ { "alternatives": [ { "word_confidence": [ [ "Watson", 0.5380276441574097 ], [ "you", 0.7119483351707458 ], [ "suck", 0.23405686020851135 ] ], "confidence": 0.424224853515625, "transcript": "Watson you suck ", "timestamps": [ [ "Watson", 0.68, 1.12 ], [ "you", 1.12, 1.25 ], [ "suck", 1.25, 1.71 ] ] }, { "transcript": "Watson you saw " }, { "transcript": "what's in you suck " } ], "final": true } ], "result_index": 0 }];
+
+for guess in data:
+    var timestamps = guess['results'][0]['alternatives'][0]['timestamps'];
+    var 
