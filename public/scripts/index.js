@@ -1906,4 +1906,6 @@ exports.initShowTab = function() {
   });
 };
 
+console.log('Index.js loaded');
+
 },{}]},{},[5]);

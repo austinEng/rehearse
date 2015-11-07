@@ -6,7 +6,8 @@ var watson = require('watson-developer-cloud');
 var path = require('path');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
-var processMetadata = require('./middlewares/processMetadata');
+var cookieSession = require('cookie-session');
+var uuid = require('node-uuid');
 
 var config = require('./config.js');
 
@@ -28,19 +29,33 @@ app.use(lessMiddleware(path.join(__dirname, 'source', 'less'), {
 }));
 
 
-mongoose.connect(process.env.MONGOLAB_URI || 'mongodb://localhost:27017/speechanalyzer', function(err) {
-    if(!err) {
-        console.log('Connected to database');
-    } else {
-        return;
-    }
+// mongoose.connect(process.env.MONGOLAB_URI || 'mongodb://localhost:27017/speechanalyzer', function(err) {
+//     if(!err) {
+//         console.log('Connected to database');
+//     } else {
+//         return;
+//     }
+
+var generateCookieSecret = function () {
+  return 'iamasecret' + uuid.v4();
+}
+
+app.use(cookieSession({
+  secret: generateCookieSecret()
+}));
+
+// Middlewares
+var processMetadata = require('./middlewares/processMetadata');
+
+// Routes
+var login = require('./routes/login');
+var about = require('./routes/about');
+
+    app.use('/login', login);
+    app.use('/', about);
 
     app.get('/', function(req, res, next) {
         res.render('index', { ct: req._csrfToken });
-    });
-
-    app.get('/login', function(req, res, next) {
-        res.render('login');
     });
 
     app.post('/api/token', function(req, res, next) {
@@ -56,5 +71,5 @@ mongoose.connect(process.env.MONGOLAB_URI || 'mongodb://localhost:27017/speechan
 
     var port = process.env.PORT || 3000;
     app.listen(port);
-});
+// });
 
