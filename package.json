@@ -12,11 +12,8 @@
     "less-middleware": "^2.0.1",
     "mongoose": "^4.2.4",
     "morgan": "^1.6.1",
-<<<<<<< HEAD
     "node-uuid": "^1.4.3",
-=======
     "node-cache": "^3.0.0",
->>>>>>> 4e3c62b619afd004a8f1ce03223392a92d4a0bf8
     "path": "^0.12.7",
     "uglifyjs": "^2.4.10",
     "watson-developer-cloud": "^0.10.6"
