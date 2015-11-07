@@ -52,6 +52,7 @@ var initializeRecording = function(token, mic, callback) {
 	options.model = 'en-US_BroadbandModel';
 
 	var results = [];
+	var hash = Math.random().toString(36).substring(2);
 
 	function onOpen(socket) {
 	    console.log('Mic socket: opened');
@@ -71,6 +72,25 @@ var initializeRecording = function(token, mic, callback) {
 	    if (msg.results) {
 	    	console.log(msg.results[0].alternatives[0].transcript);
 	    	results.push(msg);
+
+	    	if (results.length > 0) {
+	    		var json = { 
+		    		hash: hash,
+		    		data: results,
+		    		finished: false
+		    	};
+	    		$.ajax({
+			    	type: "POST",
+			    	url: "/receivedata",
+			    	async: true,
+			    	dataType: 'json',
+			    	contentType: 'application/json',
+			    	data: JSON.stringify(json),
+			    	success: function(data) {
+			    		results = [];
+			    	}
+			    });
+	    	}
 	    }
 	}
 
@@ -80,10 +100,20 @@ var initializeRecording = function(token, mic, callback) {
 
 	function onClose(evt) {
 	    console.log(results);
+	    var json = { 
+    		hash: hash,
+    		data: results,
+    		finished: true
+    	};
 	    $.ajax({
 	    	type: "POST",
 	    	url: "/receivedata",
-	    	data: { data: results }
+	    	dataType: 'json',
+	    	contentType: 'application/json',
+	    	data: JSON.stringify(json),
+	    	success: function(data) {
+
+	    	}
 	    });
 	    console.log('Mic socket close: ', evt);
 	}
