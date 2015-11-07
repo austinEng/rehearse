@@ -58,10 +58,7 @@ var processMetadata = function (req, res, next) {
   var result = {"pauses": gaps, "hesitations": hesitations, "wpm": wpm, "enunciations": enunciations, "sentence": sentence};
   res.speech_data = result;
   res.sendStatus(200);
-<<<<<<< HEAD
-=======
   console.log(result);
->>>>>>> e87a9d1329c4f35eb908fa08313fb65462b7667a
   next();
 };
 
