@@ -6,13 +6,14 @@ var watson = require('watson-developer-cloud');
 var path = require('path');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
+var processMetadata = require('./middlewares/processMetadata');
 
 var config = require('./config.js');
 
 var authService = watson.authorization(config.watson);
 
 var app = express();
-app.set('view engine', 'jade');
+app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -38,6 +39,10 @@ mongoose.connect(process.env.MONGOLAB_URI || 'mongodb://localhost:27017/speechan
         res.render('index', { ct: req._csrfToken });
     });
 
+    app.get('/login', function(req, res, next) {
+        res.render('login');
+    });
+
     app.post('/api/token', function(req, res, next) {
         authService.getToken({url: config.watson.url}, function(err, token) {
             if (err)
@@ -47,9 +52,7 @@ mongoose.connect(process.env.MONGOLAB_URI || 'mongodb://localhost:27017/speechan
         });
     });
 
-    app.post('/receivedata', function(req, res, next) {
-        console.log(req);
-    });
+    app.post('/receivedata', processMetadata);
 
     var port = process.env.PORT || 3000;
     app.listen(port);
