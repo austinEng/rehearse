@@ -36,15 +36,14 @@ app.use(cookieSession({
   secret: generateCookieSecret()
 }));
 
-// Middlewares
-var processMetadata = require('./middlewares/processMetadata');
-
 // Routes
 var login = require('./routes/login');
 var about = require('./routes/about');
+var receivedata = require('./routes/receivedata');
 
     app.use('/login', login);
     app.use('/about', about);
+    app.use('/receivedata', receivedata);
 
     app.get('/', function(req, res, next) {
         res.render('index', { ct: req._csrfToken });
@@ -59,7 +58,11 @@ var about = require('./routes/about');
         });
     });
 
-    app.use('/receivedata', processMetadata);
+// Error handling
+var handleError = require('./middlewares/handleError');
 
+    app.use('/', handleError);
+
+// Start the server
     var port = process.env.PORT || 3000;
     app.listen(port);

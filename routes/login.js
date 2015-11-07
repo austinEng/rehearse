@@ -21,7 +21,7 @@ router.route('/')
     } else {
       usersDb.destroy(function (error) {
         if (error) {
-          console.log(error);
+          next(error);
         } else {
           res.send('Cleared db');
         }
@@ -38,7 +38,7 @@ router.route('/newuser')
     var password = req.body.password;
     usersDb.createUser(username, password, function(error, username) {
       if (error) {
-        console.log(error);
+        next(error);
       } else {
         console.log('Added %s to database!', username);
         res.redirect('/login');
@@ -49,7 +49,7 @@ router.route('/newuser')
   router.get('/users', function (req, res) {
     usersDb.getAllUsers(function (error, users) {
       if (error) {
-        console.log(error);
+        next(error);
       } else {
         res.json(users);
       }

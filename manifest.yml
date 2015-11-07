@@ -1,0 +1,14 @@
+---
+declared-services:
+  tone-analyzer-service-experimental:
+    label: tone_analyzer
+    plan: experimental
+applications:
+- services:
+  - tone-analyzer-service-experimental
+  name: yhack-tone-analyzer
+  command: node app.js
+  path: .
+  memory: 512MB
+  env:
+    NODE_ENV: production
