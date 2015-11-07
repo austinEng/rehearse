@@ -18,8 +18,6 @@
 'use strict';
 
 var utils = require('./utils');
-var showerror = require('./views/showerror');
-var showError = showerror.showError;
 
 // Mini WS callback API, so we can initialize
 // with model and token in URI, plus
@@ -65,7 +63,7 @@ var initSocket = exports.initSocket = function(options, onopen, onlistening, onm
   socket.onmessage = function(evt) {
     var msg = JSON.parse(evt.data);
     if (msg.error) {
-      showError(msg.error);
+      console.error(msg.error);
       $.publish('hardsocketstop');
       return;
     }
@@ -84,7 +82,7 @@ var initSocket = exports.initSocket = function(options, onopen, onlistening, onm
 
   socket.onerror = function(evt) {
     console.log('WS onerror: ', evt);
-    showError('Application error ' + evt.code + ': please refresh your browser and try again');
+    console.error('Application error ' + evt.code + ': please refresh your browser and try again');
     $.publish('clearscreen');
     onerror(evt);
   };
