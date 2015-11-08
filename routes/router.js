@@ -27,22 +27,27 @@ router.get('/about', function (req, res) {
 });   
 
 router.get('/profile', router.isAuthenticated, function (req, res) {
-  var sessions = req.user.sessions
+  var sessions = req.user.sessions;
+  console.log("hihihi");
+  console.log(sessions);
+  console.log(sessions.length);
   var avwpm = 0;
   var avhesitation = 0;
   var avclarity = 0;
   var avspacing = 0;
   for(var i = 0; i < sessions.length; i++){
-      console.log(avwpm);
+    if(sessions[i].wpm != -1){
+      console.log(sessions[i].wpm);
       avwpm += sessions[i].wpm;
-      avhesitation += sessions[i].hesitation;
-      avclarity += sessions[i].clarity;
-      avspacing += sessions[i].spacing;
+      avhesitation += sessions[i].hesitations;
+      avclarity += sessions[i].avgClarity;
+      avspacing += sessions[i].avgSpacing;
+    }
   }
-  avwpm = avwpm/sessions.length;
-  avhesitation = avhesitation/sessions.length;
-  avclarity = avclarity/sessions.length; 
-  avspacing = avspacing/sessions.length;
+  avwpm = Math.round(avwpm/sessions.length*1000)/1000;
+  avhesitation = Math.round(avhesitation/sessions.length*1000)/1000;
+  avclarity = Math.round(avclarity/sessions.length*1000)/1000; 
+  avspacing = Math.round(avspacing/sessions.length*1000)/1000;
   req.user.sessions_info = {'avwpm': avwpm, 'avhesitation': avhesitation, 'avclarity': avclarity, 'avspacing': avspacing};
   res.render('profile', {
     user: req.user
