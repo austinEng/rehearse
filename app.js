@@ -38,8 +38,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 
-// Routes
-
 app.use('/', require('./routes/router'));
 
 app.post('/api/token', function(req, res, next) {

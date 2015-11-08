@@ -379,11 +379,13 @@ exports.generatePrompt = function () {
 
 exports.activate = function () {
 	$('#recordButton').removeClass('inactive').addClass('active');
+	$('#recordButton .text').text('Stop');
 }
 
 exports.deactivate = function () {
 	$('#recordButton').removeClass('active').addClass('inactive');
 	$('#recordButtonAnimWrap').css('padding', '');
+	$('#recordButton .text').text('Record');
 }
 
 exports.setVolume = function (vol) {
@@ -513,7 +515,7 @@ var initializeRecording = function(token, mic, callback) {
 	    	contentType: 'application/json',
 	    	data: JSON.stringify(json),
 	    	success: function(data) {
-
+    			console.log(data);
 	    	}
 	    });
 	    console.log('Mic socket close: ', evt);
