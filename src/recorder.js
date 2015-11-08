@@ -85,7 +85,21 @@ var initializeRecording = function(token, mic, callback) {
 	    	console.log(msg.results[0].alternatives[0].transcript);
 	    	results.push(msg);
 	    	analyzer.readData(msg, function() {
-	    		$('#spacing').text(Math.round(1000*analyzer.avgSpacing)/1000);
+	    		var spacing = Math.round(1000*analyzer.avgSpacing)/1000;
+	    		if (spacing < 0) { spacing = "---"; }
+	    		$('#spacing').text(spacing);
+
+	    		var hesitation = Math.round(1000*analyzer.hesitations)/1000;
+	    		if (hesitation < 0) { hesitation = '---'; }
+	    		$('#hesitation').text(hesitation);
+
+	    		var wpm = Math.round(10*analyzer.wpm)/10;
+	    		if (wpm < 0) { wpm = '---'; }
+	    		$('#wpm').text(wpm);
+
+	    		var clarity = Math.round(10*analyzer.avgClarity)/10;
+	    		if (clarity < 0) { clarity = '---'; }
+	    		$('#clarity').text(clarity);
 	    	});
 
 	    	if (results.length > 10) {
