@@ -327,6 +327,35 @@ function Analysis() {
 }
 
 Analysis.prototype.pushData = function(data) {
+	if (data.results[0].final) {
+		var content = data.results[0].alternatives[0].transcript;
+		var re = /^[^aeyiuo]+$/;
+		if (content.indexOf('%HESITATION') != -1 || re.test(content)) {
+			var t = data.results[0].alternatives[0].timestamps[0][2];
+			this.hesitationCount++;
+		}
+
+		re = /^[^aeyiuo]*$/
+		var segments = data.results[0].alternatives[0].transcript.split(" ");
+		for (var i = 0; i < segments.length; i++) {
+			if(!re.test(segments[i])) {
+				this.wpmCount++;
+			}
+		}
+
+		var clarity = this.avgClarity * this.clarityCount;
+		clarity += data.results[0].alternatives[0].confidence;
+		this.clarityCount++;
+		this.avgClarity = clarity / this.clarityCount;
+
+		var t = data.results[0].alternatives[0].timestamps[0];
+		if (t) {
+			this.hesitations = this.hesitationCount / t[2];
+			this.wpm = this.wpmCount * 60 / t[2];
+		}
+
+	}
+
 	if (!this.lastDatum && data.results[0].alternatives[0].timestamps.length <= 1) {
 		this.lastDatum = data;
 		return;
@@ -837,7 +866,21 @@ var initializeRecording = function(token, mic, callback) {
 	    	console.log(msg.results[0].alternatives[0].transcript);
 	    	results.push(msg);
 	    	analyzer.readData(msg, function() {
-	    		$('#spacing').text(Math.round(1000*analyzer.avgSpacing)/1000);
+	    		var spacing = Math.round(1000*analyzer.avgSpacing)/1000;
+	    		if (spacing < 0) { spacing = "---"; }
+	    		$('#spacing').text(spacing);
+
+	    		var hesitation = Math.round(1000*analyzer.hesitations)/1000;
+	    		if (hesitation < 0) { hesitation = '---'; }
+	    		$('#hesitation').text(hesitation);
+
+	    		var wpm = Math.round(10*analyzer.wpm)/10;
+	    		if (wpm < 0) { wpm = '---'; }
+	    		$('#wpm').text(wpm);
+
+	    		var clarity = Math.round(10*analyzer.avgClarity)/10;
+	    		if (clarity < 0) { clarity = '---'; }
+	    		$('#clarity').text(clarity);
 	    	});
 
 	    	if (results.length > 10) {

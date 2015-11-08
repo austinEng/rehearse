@@ -21,6 +21,35 @@ function Analysis() {
 }
 
 Analysis.prototype.pushData = function(data) {
+	if (data.results[0].final) {
+		var content = data.results[0].alternatives[0].transcript;
+		var re = /^[^aeyiuo]+$/;
+		if (content.indexOf('%HESITATION') != -1 || re.test(content)) {
+			var t = data.results[0].alternatives[0].timestamps[0][2];
+			this.hesitationCount++;
+		}
+
+		re = /^[^aeyiuo]*$/
+		var segments = data.results[0].alternatives[0].transcript.split(" ");
+		for (var i = 0; i < segments.length; i++) {
+			if(!re.test(segments[i])) {
+				this.wpmCount++;
+			}
+		}
+
+		var clarity = this.avgClarity * this.clarityCount;
+		clarity += data.results[0].alternatives[0].confidence;
+		this.clarityCount++;
+		this.avgClarity = clarity / this.clarityCount;
+
+		var t = data.results[0].alternatives[0].timestamps[0];
+		if (t) {
+			this.hesitations = this.hesitationCount / t[2];
+			this.wpm = this.wpmCount * 60 / t[2];
+		}
+
+	}
+
 	if (!this.lastDatum && data.results[0].alternatives[0].timestamps.length <= 1) {
 		this.lastDatum = data;
 		return;

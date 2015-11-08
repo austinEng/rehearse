@@ -24,12 +24,29 @@ router.get('/about', function (req, res) {
 	res.render('about', {
 		user: req.user
 	});
-});
+});   
 
-router.get('/profile', function (req, res) {
-	res.render('profile', {
-		user: req.user
-	});
+router.get('/profile', router.isAuthenticated, function (req, res) {
+  var sessions = user.session
+  var avwpm = 0;
+  var avhesitation = 0;
+  var avclarity = 0;
+  var avspacing = 0;
+  for(var i = 0; i < sessions.length; i++){
+      console.log(avwpm);
+      avwpm += sessions[i].wpm;
+      avhesitation += sessions[i].hesitation;
+      avclarity += sessions[i].clarity;
+      avspacing += sessions[i].spacing;
+  }
+  avwpm = avwpm/sessions.length;
+  avhesitation = avhesitation/sessions.length;
+  avclarity = avclarity/sessions.length; 
+  avspacing = avspacing/sessions.length;
+  req.user.sessions_info = {'avwpm': avwpm, 'avhesitation': avhesitation, 'avclarity': avclarity, 'avspacing': avspacing};
+  res.render('profile', {
+    user: req.user
+  });
 });
 
 // Debugging and testing routes

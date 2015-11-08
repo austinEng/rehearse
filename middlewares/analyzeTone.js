@@ -22,6 +22,7 @@ var analyzeTone = function (req, res, next) {
       if (error) {
         next(error);
       } else {
+<<<<<<< HEAD
         tone.emotion_tone.cheerfulness = 
           { percentile: data.children[0].children[0].normalized_score,
             words: data.children[0].children[0].linguistic_evidence[0].words };
@@ -49,11 +50,10 @@ var analyzeTone = function (req, res, next) {
         tone.social_tone.conscientiousness = 
           { percentile: data.children[2].children[2].normalized_score,
             words: data.children[2].children[2].linguistic_evidence[0].words };
-        res.speech_data.tone = tone;
+        res.speech_data.tone_data = tone;
       }
     });
   }
-  next();
 };
 
 module.exports = analyzeTone;
