@@ -8,60 +8,50 @@
   <body>
     <% include navbar.ejs %>
     <div class="container" id="main">
-      <h1>Rehearse</h1>
-      <h3 id="prompt"></h3>
-      <!--<button type="button" class="btn btn-default" id="recordButton">Record</button>-->
-      <div id="recordButton" class="inactive">
-        <div id="recordButtonAnimWrap"><div id="recordButtonAnim"></div></div>
-        <div class="text">Record</div>
-      </div>
+        <h1>Rehearse</h1>
+        <h3 id="prompt"></h3>
+        <!--<button type="button" class="btn btn-default" id="recordButton">Record</button>-->
+        <div id="recordRegion">
+            <canvas id="asr_viz" height="220" ></canvas>
+            <div id="recordButton" class="inactive">
+               <div id="recordButtonAnimWrap"><div id="recordButtonAnim"></div></div>
+               <div class="text">Record</div>
+            </div>
+        </div>
     </div>
     <div class="container">
       <div class="row">
-        <div class="col-sm-6 score-category">
-          <h2>Clarity</h2>
-          <div class="score" id="clarity">---</div>
+        <div class="col-sm-6 score-wrapper">
+            <div class="score-category">
+                <h2>Clarity</h2>
+                <div class="score" id="clarity">---</div>
+            </div>
         </div>
-        <div class="col-sm-6 score-category">
-          <h2>Hesitation</h2>
-          <div class="score" id="hesitation">---</div>
+        <div class="col-sm-6 score-wrapper">
+            <div class="score-category">
+                <h2>Hesitation</h2>
+                <div class="score" id="hesitation">---</div>
+            </div>
         </div>
       </div>
 
       <div class="row">
-        <div class="col-sm-6 score-category">
-          <h2>Words per Minute</h2>
-          <div class="score" id="wpm">---</div>
+        <div class="col-sm-6 score-wrapper">
+            <div class="score-category">
+                <h2>Words per Minute</h2>
+                <div class="score" id="wpm">---</div>
+            </div>
         </div>
-        <div class="col-sm-6 score-category">
-          <h2>Word Spacing</h2>
-          <div class="score" id="spacing">---</div>
+        <div class="col-sm-6 score-wrapper">
+            <div class="score-category">
+                <h2>Word Spacing</h2>
+                <div class="score" id="spacing">---</div>
+            </div>
         </div>
       </div>
     </div>
     <hr>
-
-<div id="content" class='container'>
-    <div class='row' style='min-height:400px;'>
-        <div id="asr" class='col-md-12'>
-            <div class='panel panel-default'>
-                <div class='panel-heading'>
-                    <strong>Speech Recognition</strong>
-                </div>
-                <div class='panel-body'>
-                    <div class='form-group'>
-                        <input id="nlu_tag" type="text" class="form-control" placeholder="Version Tag (Only required if performing NLU)"/>
-                    </div>
-                    <canvas id="asr_viz" height="220" ></canvas>
-                    <br/>
-                <div class='panel-body max-600' id='asr_debug_output'>
-                </div>
-            </div>
-        </div>
-    <hr/>
-</div>
-
-
+    
     <% include scripts.ejs %>
     <script src="scripts/jquery.min.js"></script>
 

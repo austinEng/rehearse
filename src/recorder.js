@@ -85,41 +85,22 @@ var initializeRecording = function(token, mic, callback) {
 	    	console.log(msg.results[0].alternatives[0].transcript);
 	    	results.push(msg);
 	    	analyzer.readData(msg, function() {
-	    		var spacing = Math.round(1000*analyzer.avgSpacing)/1000;
+	    		var spacing = Math.round(1000*analyzer.data.avgSpacing)/1000;
 	    		if (spacing < 0) { spacing = "---"; }
 	    		$('#spacing').text(spacing);
 
-	    		var hesitation = Math.round(1000*analyzer.hesitations)/1000;
+	    		var hesitation = analyzer.data.hesitations;//Math.round(1000*analyzer.hesitations)/1000;
 	    		if (hesitation < 0) { hesitation = '---'; }
 	    		$('#hesitation').text(hesitation);
 
-	    		var wpm = Math.round(10*analyzer.wpm)/10;
+	    		var wpm = Math.round(10*analyzer.data.wpm)/10;
 	    		if (wpm < 0) { wpm = '---'; }
 	    		$('#wpm').text(wpm);
 
-	    		var clarity = Math.round(10*analyzer.avgClarity)/10;
+	    		var clarity = Math.round(10*analyzer.data.avgClarity)/10;
 	    		if (clarity < 0) { clarity = '---'; }
 	    		$('#clarity').text(clarity);
 	    	});
-
-	    	if (results.length > 10) {
-	    		var json = { 
-		    		hash: hash,
-		    		data: results,
-		    		finished: false
-		    	};
-	    		$.ajax({
-			    	type: "POST",
-			    	url: "/receivedata",
-			    	async: true,
-			    	dataType: 'json',
-			    	contentType: 'application/json',
-			    	data: JSON.stringify(json),
-			    	success: function(data) {
-			    		results = [];
-			    	}
-			    });
-	    	}
 	    }
 	}
 
@@ -139,9 +120,9 @@ var initializeRecording = function(token, mic, callback) {
 	    	url: "/receivedata",
 	    	dataType: 'json',
 	    	contentType: 'application/json',
-	    	data: JSON.stringify(json),
+	    	data: JSON.stringify(analyzer.data),
 	    	success: function(data) {
-    			console.log(data);
+
 	    	}
 	    });
 	    console.log('Mic socket close: ', evt);
