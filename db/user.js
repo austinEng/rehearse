@@ -17,7 +17,8 @@ var UserSchema = new mongoose.Schema({
   },
   salt: {
     type: String
-  }
+  },
+  sessions: []
 });
 
 UserSchema.plugin(uniqueValidator);
@@ -55,5 +56,9 @@ UserSchema.methods.comparePassword = function (passw, cb) {
   });
 };
 
+UserSchema.methods.saveSession = function (session, callback) {
+  this.sessions.push(session);
+  this.save(callback);
+};
 
 module.exports = mongoose.model('User', UserSchema);

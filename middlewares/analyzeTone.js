@@ -17,7 +17,7 @@ var on = false;
 var analyzeTone = function (req, res, next) {
   var test = { text: "Hello. Analyze my tone please, Watson. Please?" };
   if (on) {
-    toneAnalyzer.tone(test, function (error, data) {
+    toneAnalyzer.tone(res.speech_data.text, function (error, data) {
       if (error) {
         next(error);
       } else {
@@ -25,6 +25,7 @@ var analyzeTone = function (req, res, next) {
       }
     });
   }
+  next();
 };
 
 module.exports = analyzeTone;

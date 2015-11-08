@@ -38,15 +38,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 
-// Routes
-var login = require('./routes/login');
-var about = require('./routes/about');
-var receivedata = require('./routes/receivedata');
-
-    app.use('/login', login);
-    app.use('/about', about);
-    app.use('/receivedata', receivedata);
-
+// Mount router
 app.use('/', require('./routes/router'));
 
 app.post('/api/token', function(req, res, next) {

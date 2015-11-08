@@ -1,6 +1,8 @@
 "use strict"
 var express = require('express');
 var router = express.Router();
+var receivedata = require('./receivedata');
+var User = require('../db/user');
 
 module.exports = router;
 
@@ -26,4 +28,18 @@ router.get('/profile', function (req, res) {
 	res.render('profile');
 });
 
-router.use('/receivedata', require('./receivedata'));
+// Debugging and testing routes
+
+router.get('/users', function (req, res) {
+  User.find({}, function (error, users) {
+    res.json(users);
+  });
+});
+
+router.get('/cleardb', function (req, res) {
+  User.remove({}, function (error) {
+    res.send('Cleared db');
+  })
+});
+
+router.use('/receivedata', receivedata);
