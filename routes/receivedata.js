@@ -7,6 +7,8 @@ var analyzeTone = require('../middlewares/analyzeTone');
 var processSpeech = require('../middlewares/processSpeech');
 var saveSession = require('../middlewares/saveSession');
 
-router.post('/', processSpeech, processMetadata, analyzeTone, saveSession);
+router.get('/test', analyzeTone);
+
+router.post('/', analyzeTone, saveSession);
 
 module.exports = router;
