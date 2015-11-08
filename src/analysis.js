@@ -30,7 +30,7 @@ Analysis.prototype.pushData = function(data) {
 			this.data.hesitationCount++;
 		}
 
-		re = /^[^aeyiuo]*$/
+		re = /^[^aeyiuo]*$/;
 		var segments = data.results[0].alternatives[0].transcript.split(" ");
 		for (var i = 0; i < segments.length; i++) {
 			if(!re.test(segments[i])) {

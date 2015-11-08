@@ -7,9 +7,9 @@ app.controller('StatsCtrl', function($scope, $attrs) {
     var sessions = JSON.parse($attrs.model);
     console.log(sessions);
     var times = sessions.map(function(x) { return x.time; });
-    var clarities = sessions.map(function(x) { return x.clarity; });
-    var hesitations = sessions.map(function(x) { return x.hesitation; });
-    var spacings = sessions.map(function(x) { return x.spacing; });
+    var clarities = sessions.map(function(x) { return x.avgClarity; });
+    var hesitations = sessions.map(function(x) { return x.hesitations; });
+    var spacings = sessions.map(function(x) { return x.avgSpacing; });
     var wpms = sessions.map(function(x) { return x.wpm; });
     var trace_clarity = {
         x: times,
