@@ -110,9 +110,13 @@ exports.display = function(){
     $connect.on('click', connect);
 
     var postText = function (msg) {
+        console.log("-------------------NUANCE-----------------");
         console.log(msg);
         console.log(msg.transcriptions[0]);
         console.log('Sending text to server');
+        $('#response').hide();
+        $('#response').text(msg.transcriptions[0]);
+        $('#response').slideDown(300);
     };
 
     $url.val(URL || '');

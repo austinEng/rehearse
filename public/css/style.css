@@ -7,6 +7,19 @@ body {
 }
 
 .navbar-default {
-	background-color: #80A6FF;
+	background-color: #5D8DFF;
 	background-image: none;
+}
+
+.navbar-default .navbar-nav>li>a {
+    color: #FFF;
+}
+
+.navbar-default .navbar-brand {
+    color: #FFF;
+}
+
+form {
+	max-width: 400px;
+	margin: auto;
 }
