@@ -32,18 +32,18 @@ router.get('/profile', router.isAuthenticated, function (req, res) {
   var avg_hesitation = 0;
   var avg_clarity = 0;
   var avg_spacing = 0;
-  for(var i = 0; i < sessions.length; i++){
+  for (var i = 0; i < sessions.length; i++) {
       console.log(avg_wpm);
       avg_wpm += sessions[i].wpm;
       avg_hesitation += sessions[i].hesitation;
       avg_clarity += sessions[i].clarity;
       avg_spacing += sessions[i].spacing;
   }
-  avg_wpm = avg_wpm/sessions.length;
-  avg_hesitation = avg_hesitation/sessions.length;
-  avg_clarity = avg_clarity/sessions.length; 
-  avg_spacing = avg_spacing/sessions.length;
-  req.user.sessions_info = {'avg_wpm': 4.20, 'avg_hesitation': 4.20, 'avg_clarity': 4.20, 'avg_spacing': 4.20};
+  avg_wpm = Math.round(avg_wpm / sessions.length * 1000)/1000;
+  avg_hesitation = Math.round(avg_hesitation / sessions.length * 1000)/1000;
+  avg_clarity = Math.round(avg_clarity / sessions.length * 1000)/1000; 
+  avg_spacing = Math.round(avg_spacing / sessions.length * 1000)/1000;
+  req.user.sessions_info = {'avg_wpm': avg_wpm, 'avg_hesitation': avg_hesitation, 'avg_clarity': avg_clarity, 'avg_spacing': avg_spacing};
   var session1 = {'wpm': 10.5, 'hesitation': 10, 'spacing': 3, 'clarity': 0.4, 'time': new Date(2012, 9, 1)};
   var session2 = {'wpm': 40, 'hesitation': 2, 'spacing': 0.82, 'clarity': 3.2,'time': new Date(2013, 9, 1)};
   var session3 = {'wpm': 60, 'hesitation': 0.5, 'spacing': 0.5, 'clarity': 6, 'time': new Date()};
