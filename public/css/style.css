@@ -1,3 +1,12 @@
 #main {
   text-align: center;
 }
+
+body {
+	background-color: #efefef;
+}
+
+.navbar-default {
+	background-color: #80A6FF;
+	background-image: none;
+}

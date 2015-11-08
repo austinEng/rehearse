@@ -305,21 +305,22 @@ Microphone.prototype.onAudio =  function() {};
 module.exports = Microphone;
 },{"./utils":8,"./volume-meter":9}],2:[function(require,module,exports){
 function Analysis() {
-	this.minClarity = -1;
-	this.maxClarity = -1;
-	this.avgClarity = -1;
-	this.clarityCount = 0;
+	this.data = {};
+	this.data.minClarity = -1;
+	this.data.maxClarity = -1;
+	this.data.avgClarity = -1;
+	this.data.clarityCount = 0;
 
-	this.wpm = -1;
-	this.wpmCount = 0;
+	this.data.wpm = -1;
+	this.data.wpmCount = 0;
 
-	this.minSpacing = -1;
-	this.maxSpacing = -1;
-	this.avgSpacing = -1;
-	this.spacingCount = 0;
+	this.data.minSpacing = -1;
+	this.data.maxSpacing = -1;
+	this.data.avgSpacing = -1;
+	this.data.spacingCount = 0;
 
-	this.hesitations = -1;
-	this.hesitationCount = 0;
+	this.data.hesitations = -1;
+	this.data.hesitationCount = 0;
 
 	this.stack = [];
 
@@ -332,26 +333,26 @@ Analysis.prototype.pushData = function(data) {
 		var re = /^[^aeyiuo]+$/;
 		if (content.indexOf('%HESITATION') != -1 || re.test(content)) {
 			var t = data.results[0].alternatives[0].timestamps[0][2];
-			this.hesitationCount++;
+			this.data.hesitationCount++;
 		}
 
 		re = /^[^aeyiuo]*$/
 		var segments = data.results[0].alternatives[0].transcript.split(" ");
 		for (var i = 0; i < segments.length; i++) {
 			if(!re.test(segments[i])) {
-				this.wpmCount++;
+				this.data.wpmCount++;
 			}
 		}
 
-		var clarity = this.avgClarity * this.clarityCount;
+		var clarity = this.data.avgClarity * this.data.clarityCount;
 		clarity += data.results[0].alternatives[0].confidence;
-		this.clarityCount++;
-		this.avgClarity = clarity / this.clarityCount;
+		this.data.clarityCount++;
+		this.data.avgClarity = clarity / this.data.clarityCount;
 
 		var t = data.results[0].alternatives[0].timestamps[0];
 		if (t) {
-			this.hesitations = this.hesitationCount / t[2];
-			this.wpm = this.wpmCount * 60 / t[2];
+			this.data.hesitations = this.data.hesitationCount;// / t[2];
+			this.data.wpm = this.data.wpmCount * 60 / t[2];
 		}
 
 	}
@@ -374,18 +375,18 @@ Analysis.prototype.pushData = function(data) {
 			var t1 = times[i];
 			var t2 = times[i+1];
 
-			if (this.spacingCount == 0) {
+			if (this.data.spacingCount == 0) {
 				if (t2[1] - t1[2] > 0) {
-					this.avgSpacing = t2[1] - t1[2];
-					this.spacingCount++;
+					this.data.avgSpacing = t2[1] - t1[2];
+					this.data.spacingCount++;
 				}		
 			} else {
-				var spacing = this.avgSpacing * this.spacingCount;
+				var spacing = this.data.avgSpacing * this.data.spacingCount;
 				if (t2[1] - t1[2] > 0) {
 					spacing += t2[1] - t1[2];
 				}
-				this.spacingCount++;
-				this.avgSpacing = spacing / this.spacingCount;
+				this.data.spacingCount++;
+				this.data.avgSpacing = spacing / this.data.spacingCount;
 			}
 		}
 	}
@@ -401,12 +402,12 @@ Analysis.prototype.popData = function(cb) {
 		for (var i = 0; i < times.length - 1; i++) {
 			var t1 = times[i];
 			var t2 = times[i+1];
-			var spacing = this.avgSpacing * this.spacingCount;
+			var spacing = this.data.avgSpacing * this.data.spacingCount;
 			if (t2[1] - t1[2] > 0) {
 				spacing -= t2[1] - t1[2];
 			}
-			this.spacingCount--;
-			this.avgSpacing = spacing / this.spacingCount;
+			this.data.spacingCount--;
+			this.data.avgSpacing = spacing / this.data.spacingCount;
 		}
 	}
 }
@@ -622,41 +623,22 @@ var initializeRecording = function(token, mic, callback) {
 	    	console.log(msg.results[0].alternatives[0].transcript);
 	    	results.push(msg);
 	    	analyzer.readData(msg, function() {
-	    		var spacing = Math.round(1000*analyzer.avgSpacing)/1000;
+	    		var spacing = Math.round(1000*analyzer.data.avgSpacing)/1000;
 	    		if (spacing < 0) { spacing = "---"; }
 	    		$('#spacing').text(spacing);
 
-	    		var hesitation = Math.round(1000*analyzer.hesitations)/1000;
+	    		var hesitation = analyzer.data.hesitations;//Math.round(1000*analyzer.hesitations)/1000;
 	    		if (hesitation < 0) { hesitation = '---'; }
 	    		$('#hesitation').text(hesitation);
 
-	    		var wpm = Math.round(10*analyzer.wpm)/10;
+	    		var wpm = Math.round(10*analyzer.data.wpm)/10;
 	    		if (wpm < 0) { wpm = '---'; }
 	    		$('#wpm').text(wpm);
 
-	    		var clarity = Math.round(10*analyzer.avgClarity)/10;
+	    		var clarity = Math.round(10*analyzer.data.avgClarity)/10;
 	    		if (clarity < 0) { clarity = '---'; }
 	    		$('#clarity').text(clarity);
 	    	});
-
-	    	if (results.length > 10) {
-	    		var json = { 
-		    		hash: hash,
-		    		data: results,
-		    		finished: false
-		    	};
-	    		$.ajax({
-			    	type: "POST",
-			    	url: "/receivedata",
-			    	async: true,
-			    	dataType: 'json',
-			    	contentType: 'application/json',
-			    	data: JSON.stringify(json),
-			    	success: function(data) {
-			    		results = [];
-			    	}
-			    });
-	    	}
 	    }
 	}
 
@@ -676,9 +658,9 @@ var initializeRecording = function(token, mic, callback) {
 	    	url: "/receivedata",
 	    	dataType: 'json',
 	    	contentType: 'application/json',
-	    	data: JSON.stringify(json),
+	    	data: JSON.stringify(analyzer.data),
 	    	success: function(data) {
-    			console.log(data);
+
 	    	}
 	    });
 	    console.log('Mic socket close: ', evt);
