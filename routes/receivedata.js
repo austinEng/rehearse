@@ -2,10 +2,12 @@
 var express = require('express');
 var router = express.Router();
 
-/*var processMetadata = require('../middlewares/processMetadata');
 var analyzeTone = require('../middlewares/analyzeTone');
-var processSpeech = require('../middlewares/processSpeech');
 var saveSession = require('../middlewares/saveSession');
+
+/*var processMetadata = require('../middlewares/processMetadata');
+var processSpeech = require('../middlewares/processSpeech');
+
 
 router.post('/', processSpeech, processMetadata, analyzeTone, saveSession);*/
 
