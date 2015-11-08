@@ -14,16 +14,20 @@ router.isAuthenticated = function (req, res, next) {
 
 router.get('/', router.isAuthenticated, function (req, res) {
   res.render('index', {
-
+  	user: req.user
   });
 });
 
 router.get('/about', function (req, res) {
-	res.render('about');
+	res.render('about', {
+		user: req.user
+	});
 });
 
 router.get('/profile', function (req, res) {
-	res.render('profile');
+	res.render('profile', {
+		user: req.user
+	});
 });
 
 router.use('/receivedata', require('./receivedata'));

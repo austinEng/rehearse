@@ -10,7 +10,8 @@ module.exports = function(router) {
     if (req.user) res.redirect('/');
     res.render('register', {
       isRegistration: true,
-      error: req.flash('error')
+      error: req.flash('error'),
+      user: req.user
     });
   });
 
@@ -25,6 +26,7 @@ module.exports = function(router) {
     res.render('login', {
       isRegistration: false,
       error: req.flash('error'),
+      user: req.user
     });
   });
 
