@@ -39,13 +39,6 @@ app.use(passport.session());
 app.use(flash());
 
 // Routes
-var login = require('./routes/login');
-var about = require('./routes/about');
-var receivedata = require('./routes/receivedata');
-
-    app.use('/login', login);
-    app.use('/about', about);
-    app.use('/receivedata', receivedata);
 
 app.use('/', require('./routes/router'));
 
