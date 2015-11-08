@@ -2,6 +2,8 @@ var Microphone = require('./Microphone');
 var initSocket = require('./socket').initSocket;
 var button = require('./recordbutton');
 
+var Analysis = require('./analysis');
+
 exports.initRecorder = function(ctx) {
 	var recordButton = $('#recordButton');
 
@@ -62,6 +64,7 @@ var initializeRecording = function(token, mic, callback) {
 
 	var results = [];
 	var hash = Math.random().toString(36).substring(2);
+	var analyzer = new Analysis();
 
 	function onOpen(socket) {
 	    console.log('Mic socket: opened');
@@ -81,6 +84,9 @@ var initializeRecording = function(token, mic, callback) {
 	    if (msg.results) {
 	    	console.log(msg.results[0].alternatives[0].transcript);
 	    	results.push(msg);
+	    	analyzer.readData(msg, function() {
+	    		$('#spacing').text(Math.round(1000*analyzer.avgSpacing)/1000);
+	    	});
 
 	    	if (results.length > 10) {
 	    		var json = { 
