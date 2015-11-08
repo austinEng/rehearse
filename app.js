@@ -24,13 +24,13 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(session({secret: config.cookie_secret, saveUninitialized: true, resave: true}));
 app.use(express.static(path.join(__dirname, '/public')));
-app.use(lessMiddleware(path.join(__dirname, 'source', 'less'), {
-    dest: path.join(__dirname, 'public'),
-    preprocess: {
-        path: function(pathname, req) {
-            return pathname.replace(path.sep + 'stylesheets' + path.sep, path.sep);
-        }
+app.use(lessMiddleware(path.join(__dirname, 'src', 'less'), {
+  dest: path.join(__dirname, 'public'),
+  preprocess: {
+    path: function(pathname, req) {
+      return pathname.replace(path.sep + 'css' + path.sep, path.sep);
     }
+  }
 }));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -38,7 +38,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 
-// Mount router
 app.use('/', require('./routes/router'));
 
 app.post('/api/token', function(req, res, next) {

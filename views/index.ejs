@@ -3,15 +3,44 @@
   <head>
     <% include header.ejs %>
     <title>Rehearse</title>
+    <link rel="stylesheet" type="text/css" href="/css/record.css">
   </head>
   <body>
     <% include navbar.ejs %>
-    <div class="container-fluid" id="main">
+    <div class="container" id="main">
       <h1>Rehearse</h1>
       <h3 id="prompt"></h3>
-      <button type="button" class="btn btn-default" id="recordButton">Record</button>
+      <!--<button type="button" class="btn btn-default" id="recordButton">Record</button>-->
+      <div id="recordButton" class="inactive">
+        <div id="recordButtonAnimWrap"><div id="recordButtonAnim"></div></div>
+        <div class="text">Record</div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-6 score-category">
+          <h2>Clarity</h2>
+          <div class="score" id="clarity">0</div>
+        </div>
+        <div class="col-sm-6 score-category">
+          <h2>Hesitation</h2>
+          <div class="score" id="hesitation">0</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-6 score-category">
+          <h2>Words per Minute</h2>
+          <div class="score" id="wpm">0</div>
+        </div>
+        <div class="col-sm-6 score-category">
+          <h2>Word Spacing</h2>
+          <div class="score" id="spacing">0</div>
+        </div>
+      </div>
     </div>
     <hr>
     <% include scripts.ejs %>
+    <script src="scripts/index.js"></script>
   </body>
 </html>
