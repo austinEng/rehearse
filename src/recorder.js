@@ -1,14 +1,20 @@
 var Microphone = require('./Microphone');
 var initSocket = require('./socket').initSocket;
+var button = require('./recordbutton');
 
 exports.initRecorder = function(ctx) {
 	var recordButton = $('#recordButton');
+
+	var volumeRead = function(volume) {
+		button.setVolume(80*(1 - Math.sqrt(Math.sqrt(volume))));
+	};
 
 	recordButton.click((function() {
 		var running = false;
 	    var token = ctx.token;
 	    var micOptions = {
-	    	bufferSize: ctx.buffersize
+	    	bufferSize: ctx.buffersize,
+	    	volumeRead: volumeRead
 	    };
 	    var mic = new Microphone(micOptions);
 
@@ -20,10 +26,12 @@ exports.initRecorder = function(ctx) {
 	    				console.log("Couldn't start recorder");
 	    				console.log('Error: ' + err.message);
 	    				running = false;
+	    				button.deactivate();
 	    			} else {
 	    				console.log("Starting record");
 			    		mic.record();
 			    		running = true;
+			    		button.activate();
 	    			}
 	    		});
 	    	} else {
@@ -31,6 +39,7 @@ exports.initRecorder = function(ctx) {
 	    		$.publish('hardsocketstop');
 	    		mic.stop();
 	    		running = false;
+	    		button.deactivate();
 	    	}
 	    }
 	})());
@@ -73,7 +82,7 @@ var initializeRecording = function(token, mic, callback) {
 	    	console.log(msg.results[0].alternatives[0].transcript);
 	    	results.push(msg);
 
-	    	if (results.length > 0) {
+	    	if (results.length > 10) {
 	    		var json = { 
 		    		hash: hash,
 		    		data: results,

@@ -22,6 +22,7 @@
     "passport-local": "^1.0.0",
     "path": "^0.12.7",
     "uglifyjs": "^2.4.10",
+    "watchify": "^3.6.0",
     "watson-developer-cloud": "^0.10.6"
   },
   "browserify-shim": {
@@ -34,6 +35,8 @@
   },
   "scripts": {
     "start": "node app.js",
-    "build": "browserify src/index.js > public/scripts/index.js"
+    "build": "browserify src/index.js -o public/scripts/index.js",
+    "watch": "watchify src/index.js -o public/scripts/index.js -v",
+    "dev": "npm run watch & nodemon app.js"
   }
 }

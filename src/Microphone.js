@@ -17,6 +17,7 @@
 'use strict';
 
 var utils = require('./utils');
+var createAudioMeter = require('./volume-meter').createAudioMeter;
 /**
  * Captures microphone input from the browser.
  * Works at least on latest versions of Firefox and Chrome
@@ -32,6 +33,7 @@ function Microphone(_options) {
   this.recording = false;
   this.requestedAccess = false;
   this.sampleRate = 16000;
+  this.volumeRead = options.volumeRead;
   // auxiliar buffer to keep unused samples (used when doing downsampling)
   this.bufferUnusedSamples = new Float32Array(0);
 
@@ -91,6 +93,9 @@ Microphone.prototype.onMediaStream =  function(stream) {
   this.recording = true;
   this.requestedAccess = false;
   this.onStartRecording();
+
+  this.meter = createAudioMeter(this.audioContext, 0.98, 0);
+  audioInput.connect(this.meter);
 };
 
 /**
@@ -108,7 +113,7 @@ Microphone.prototype._onaudioprocess = function(data) {
   var chan = data.inputBuffer.getChannelData(0);
 
   //resampler(this.audioContext.sampleRate,data.inputBuffer,this.onAudio);
-
+  this.volumeRead(this.meter.volume);
   this.onAudio(this._exportDataBufferTo16Khz(new Float32Array(chan)));
 
   //export with microphone mhz, remember to update the this.sampleRate
