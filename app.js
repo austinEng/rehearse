@@ -38,6 +38,14 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 
+// Routes
+var login = require('./routes/login');
+var about = require('./routes/about');
+var receivedata = require('./routes/receivedata');
+
+    app.use('/login', login);
+    app.use('/about', about);
+    app.use('/receivedata', receivedata);
 
 app.use('/', require('./routes/router'));
 
@@ -50,6 +58,11 @@ app.post('/api/token', function(req, res, next) {
     });
 });
 
+// Error handling
+var handleError = require('./middlewares/handleError');
+
+    app.use('/', handleError);
+
 mongoose.connect('mongodb://localhost:27017/speechanalyzer', function (err) {
   if (err && err.message === 'connect ECONNREFUSED') {
     console.log('Error connecting to mongodb database: %s.\nIs "mongod" running?', err.message);
@@ -61,5 +74,6 @@ mongoose.connect('mongodb://localhost:27017/speechanalyzer', function (err) {
     var server = app.listen(app.get('port'), function() {
         console.log('Express server listening on port ' + server.address().port);
     });
+
   }
 });

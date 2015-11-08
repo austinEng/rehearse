@@ -331,6 +331,8 @@ var generatePrompt = require('./prompt').generatePrompt;
 window.BUFFERSIZE = 8192;
 
 $(document).ready(function() {
+  $('#prompt').text(generatePrompt);
+
   var tokenGenerator = utils.createTokenGenerator();
 
   // Make call to API to try and get token
@@ -355,8 +357,6 @@ $(document).ready(function() {
       bufferSize: BUFFERSIZE
     };
 
-    $('#prompt').text(generatePrompt);
-
     Recorder.initRecorder(context);
 
   });
@@ -364,8 +364,15 @@ $(document).ready(function() {
 });
 
 },{"./prompt":3,"./recorder":5,"./utils":7}],3:[function(require,module,exports){
+var getRandomInt = function (min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 exports.generatePrompt = function () {
-  return 'Hello from generatePrompt';
+  var prompts = ['Tell me about yourself.', 'Tell me about a recent project you\'ve worked on.',
+  'Do you prefer to work in a team or alone? Why?', 'Describe a recent programming challenge you encountered and how you dealt with it.',
+  'What is your biggest weakness?'];
+  return prompts[getRandomInt(0, prompts.length - 1)];
 };
 
 },{}],4:[function(require,module,exports){

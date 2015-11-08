@@ -26,4 +26,4 @@ router.get('/profile', function (req, res) {
 	res.render('profile');
 });
 
-router.use('/receivedata', require('../middlewares/processMetadata'));
+router.use('/receivedata', require('./receivedata'));

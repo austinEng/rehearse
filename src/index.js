@@ -25,6 +25,8 @@ var generatePrompt = require('./prompt').generatePrompt;
 window.BUFFERSIZE = 8192;
 
 $(document).ready(function() {
+  $('#prompt').text(generatePrompt);
+
   var tokenGenerator = utils.createTokenGenerator();
 
   // Make call to API to try and get token
@@ -48,8 +50,6 @@ $(document).ready(function() {
       token: token,
       bufferSize: BUFFERSIZE
     };
-
-    $('#prompt').text(generatePrompt);
 
     Recorder.initRecorder(context);
 
