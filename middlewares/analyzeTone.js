@@ -23,24 +23,24 @@ var analyzeTone = function (req, res, next) {
         next(error);
       } else {
         console.log(data);
-        var tone.emotion_tone.cheerfulness = req.children[0].children[0].normalized_score;
-        var tone.emotion_tone.negative = req.children[0].children[1].normalized_score;
-        var tone.emotion_tone.anger = req.children[0].children[2].normalized_score;
-        var tone.writing_tone.analytical = req.children[1].children[0].normalized_score;
-        var tone.writing_tone.confident = req.children[1].children[1].normalized_score;
-        var tone.writing_tone.tentative = req.children[1].children[2].normalized_score;
-        var tone.social_tone.openness = req.children[2].children[0].normalized_score;
-        var tone.social_tone.agreeableness = req.children[2].children[1].normalized_score;
-        var tone.social_tone.conscientiousness = req.children[2].children[2].normalized_score;
+        tone.emotion_tone.cheerfulness = req.children[0].children[0].normalized_score;
+        tone.emotion_tone.negative = req.children[0].children[1].normalized_score;
+        tone.emotion_tone.anger = req.children[0].children[2].normalized_score;
+        tone.writing_tone.analytical = req.children[1].children[0].normalized_score;
+        tone.writing_tone.confident = req.children[1].children[1].normalized_score;
+        tone.writing_tone.tentative = req.children[1].children[2].normalized_score;
+        tone.social_tone.openness = req.children[2].children[0].normalized_score;
+        tone.social_tone.agreeableness = req.children[2].children[1].normalized_score;
+        tone.social_tone.conscientiousness = req.children[2].children[2].normalized_score;
 
-        var total = tone.emotion_tone.cheerfulness + tone.emotion_tone.negative + tone.emotion_tone.anger 
+        total = tone.emotion_tone.cheerfulness + tone.emotion_tone.negative + tone.emotion_tone.anger 
                     + tone.writing_tone.analytical + tone.writing_tone.confident + tone.writing_tone.tentative
                     + tone.social_tone.openness + tone.social_tone.agreeableness + tone.social_tone.conscientiousness;
-        var.tone.emotion_tone.score = (tone.emotion_tone.cheerfulness + 
+        tone.emotion_tone.score = (tone.emotion_tone.cheerfulness + 
                 tone.emotion_tone.negative + tone.emotion_tone.anger)/total; 
-        var tone.writing_tone.score = (tone.writing_tone.analytical + 
+        tone.writing_tone.score = (tone.writing_tone.analytical + 
                 tone.writing_tone.confident + tone.writing_tone.tentative)/total;
-        var tone.social_tone.score = (tone.social_tone.openness + 
+        tone.social_tone.score = (tone.social_tone.openness + 
         tone.social_tone.agreeableness + tone.social_tone.conscientiousness)/total;
 
       }

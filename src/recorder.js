@@ -121,7 +121,7 @@ var initializeRecording = function(token, mic, callback) {
 	    	contentType: 'application/json',
 	    	data: JSON.stringify(json),
 	    	success: function(data) {
-
+    			console.log(data);
 	    	}
 	    });
 	    console.log('Mic socket close: ', evt);

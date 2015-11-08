@@ -44,10 +44,23 @@
 	background-color: #F92E2E;
 }
 
+#recordButton.active #recordButtonAnimWrap {
+	padding: 25%;
+}
+
+
 #recordButtonAnim {
 	transition: background ease 0.3s;
 }
 
 #recordButtonAnimWrap {
 	transition: padding ease 0.3s;
+}
+
+.score-category h2 {
+	text-align: center;
+}
+.score {
+	text-align: center;
+	font-size: 50px;
 }
