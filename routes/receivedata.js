@@ -20,4 +20,8 @@ router.post('/', function (req, res, next) {
 	});
 });
 
+router.get('/test', analyzeTone);
+
+router.post('/', analyzeTone, saveSession);
+
 module.exports = router;

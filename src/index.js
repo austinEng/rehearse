@@ -21,6 +21,7 @@ var utils = require('./utils');
 utils.initPubSub();
 var Recorder = require('./recorder');
 var generatePrompt = require('./prompt').generatePrompt;
+var nuanceDisplay = require('./nuanceDisplay');
 
 window.BUFFERSIZE = 8192;
 
@@ -52,6 +53,7 @@ $(document).ready(function() {
     };
 
     Recorder.initRecorder(context);
+    nuanceDisplay.display();
 
   });
 

@@ -15,38 +15,45 @@ var toneAnalyzer = watson.tone_analyzer(credentials);
 var on = false;
 
 var analyzeTone = function (req, res, next) {
-  var tone = {};
-  var test = { text: "Hello. Analyze my tone please, Watson. Please?" };
+  var tone = { emotion_tone: {}, writing_tone: {}, social_tone: {} };
+  var test = { text: "Hi Team, I know the times are difficult! Our sales have been disappointing for the past three quarters for our data analytics product suite. We have a competitive data analytics product suite in the industry. But we need to do our job selling it! We need to acknowledge and fix our sales challenges. We can’t blame the economy for our lack of execution! We are missing critical sales opportunities. Our product  is in no way inferior to the competitor products. Our clients are hungry for analytical tools to improve their business outcomes. Economy has nothing to do with it. In fact, it is in times such as this, our clients want to get the insights they need to turn their businesses around. Let’s buckle up and execute. In summary, we have a competitive product, and a hungry market. We have to do our job to close the deals" };
   if (on) {
-    toneAnalyzer.tone(res.speech_data.text, function (error, data) {
+    toneAnalyzer.tone(test, function (error, data) {
       if (error) {
         next(error);
       } else {
-        console.log(data);
-        tone.emotion_tone.cheerfulness = req.children[0].children[0].normalized_score;
-        tone.emotion_tone.negative = req.children[0].children[1].normalized_score;
-        tone.emotion_tone.anger = req.children[0].children[2].normalized_score;
-        tone.writing_tone.analytical = req.children[1].children[0].normalized_score;
-        tone.writing_tone.confident = req.children[1].children[1].normalized_score;
-        tone.writing_tone.tentative = req.children[1].children[2].normalized_score;
-        tone.social_tone.openness = req.children[2].children[0].normalized_score;
-        tone.social_tone.agreeableness = req.children[2].children[1].normalized_score;
-        tone.social_tone.conscientiousness = req.children[2].children[2].normalized_score;
-
-        total = tone.emotion_tone.cheerfulness + tone.emotion_tone.negative + tone.emotion_tone.anger 
-                    + tone.writing_tone.analytical + tone.writing_tone.confident + tone.writing_tone.tentative
-                    + tone.social_tone.openness + tone.social_tone.agreeableness + tone.social_tone.conscientiousness;
-        tone.emotion_tone.score = (tone.emotion_tone.cheerfulness + 
-                tone.emotion_tone.negative + tone.emotion_tone.anger)/total; 
-        tone.writing_tone.score = (tone.writing_tone.analytical + 
-                tone.writing_tone.confident + tone.writing_tone.tentative)/total;
-        tone.social_tone.score = (tone.social_tone.openness + 
-        tone.social_tone.agreeableness + tone.social_tone.conscientiousness)/total;
-
+<<<<<<< HEAD
+        tone.emotion_tone.cheerfulness = 
+          { percentile: data.children[0].children[0].normalized_score,
+            words: data.children[0].children[0].linguistic_evidence[0].words };
+        tone.emotion_tone.negative = 
+          { percentile: data.children[0].children[1].normalized_score,
+            words: data.children[0].children[1].linguistic_evidence[0].words };
+        tone.emotion_tone.anger = 
+          { percentile: data.children[0].children[2].normalized_score,
+            words: data.children[0].children[2].linguistic_evidence[0].words };
+        tone.writing_tone.analytical = 
+          { percentile: data.children[1].children[0].normalized_score,
+            words: data.children[1].children[0].linguistic_evidence[0].words };
+        tone.writing_tone.confident = 
+          { percentile: data.children[1].children[1].normalized_score,
+            words: data.children[1].children[1].linguistic_evidence[0].words };
+        tone.writing_tone.tentative = 
+          { percentile: data.children[1].children[2].normalized_score,
+            words: data.children[1].children[2].linguistic_evidence[0].words };
+        tone.social_tone.openness = 
+          { percentile: data.children[2].children[0].normalized_score,
+            words: data.children[2].children[0].linguistic_evidence[0].words };
+        tone.social_tone.agreeableness = 
+          { percentile: data.children[2].children[1].normalized_score,
+            words: data.children[2].children[1].linguistic_evidence[0].words };
+        tone.social_tone.conscientiousness = 
+          { percentile: data.children[2].children[2].normalized_score,
+            words: data.children[2].children[2].linguistic_evidence[0].words };
+        res.speech_data.tone_data = tone;
       }
     });
   }
-  next();
 };
 
 module.exports = analyzeTone;
