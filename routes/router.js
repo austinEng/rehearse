@@ -33,11 +33,13 @@ router.get('/profile', router.isAuthenticated, function (req, res) {
   var avg_clarity = 0;
   var avg_spacing = 0;
   for (var i = 0; i < sessions.length; i++) {
+    if(sessions[i].wpm != -1){
       console.log(avg_wpm);
       avg_wpm += sessions[i].wpm;
-      avg_hesitation += sessions[i].hesitation;
-      avg_clarity += sessions[i].clarity;
-      avg_spacing += sessions[i].spacing;
+      avg_hesitation += sessions[i].hesitations;
+      avg_clarity += sessions[i].avgClarity;
+      avg_spacing += sessions[i].avgSpacing;
+    }
   }
   avg_wpm = Math.round(avg_wpm / sessions.length * 1000)/1000;
   avg_hesitation = Math.round(avg_hesitation / sessions.length * 1000)/1000;
