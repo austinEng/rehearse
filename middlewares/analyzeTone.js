@@ -22,7 +22,6 @@ var analyzeTone = function (req, res, next) {
       if (error) {
         next(error);
       } else {
-<<<<<<< HEAD
         tone.emotion_tone.cheerfulness = 
           { percentile: data.children[0].children[0].normalized_score,
             words: data.children[0].children[0].linguistic_evidence[0].words };
