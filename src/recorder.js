@@ -109,12 +109,15 @@ var initializeRecording = function(token, mic, callback) {
 	}
 
 	function onClose(evt) {
-	    console.log(results);
+	    
 	    var json = { 
     		hash: hash,
     		data: results,
     		finished: true
     	};
+    	analyzer.data.time = new Date().toISOString();
+    	console.log(analyzer.data);
+
 	    $.ajax({
 	    	type: "POST",
 	    	url: "/receivedata",

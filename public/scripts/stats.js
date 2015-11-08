@@ -4,6 +4,7 @@ app.controller('StatsCtrl', function($scope, $attrs) {
        console.log('Stats ctrl activate');
     if (!$attrs.model) throw new Error("No model for StatsCtrl");
     // Pass in sessions into scope thru attrs
+    console.log($attrs.model);
     var sessions = JSON.parse($attrs.model);
     console.log(sessions);
     var times = sessions.map(function(x) { return x.time; });
@@ -46,11 +47,14 @@ app.controller('StatsCtrl', function($scope, $attrs) {
     var data = [trace_clarity, trace_hesitation, trace_wpm, trace_spacing];
     var layout = {
       legend: {
-        y: 0.5,
         traceorder: 'reversed',
         font: {size: 16},
         yref: 'paper'
-      }};
+      },
+      xaxis: {
+        title: 'Date'
+      }
+    };
     var fields = ['clarity', 'hesitation', 'wpm', 'spacing'];
     for (var i = 0; i < fields.length; i++) {
         Plotly.newPlot('plot_' + fields[i], [data[i]], layout, {showLink: false});

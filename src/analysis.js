@@ -1,3 +1,7 @@
+function round(x) {
+	return Math.round(1000 * x)/1000;
+}
+
 function Analysis() {
 	this.data = {};
 	this.data.minClarity = -1;
@@ -44,12 +48,12 @@ Analysis.prototype.pushData = function(data) {
 		var clarity = this.data.avgClarity * this.data.clarityCount;
 		clarity += data.results[0].alternatives[0].confidence;
 		this.data.clarityCount++;
-		this.data.avgClarity = clarity / this.data.clarityCount;
+		this.data.avgClarity = round(clarity / this.data.clarityCount);
 
 		var t = data.results[0].alternatives[0].timestamps[0];
 		if (t) {
 			this.data.hesitations = this.data.hesitationCount;// / t[2];
-			this.data.wpm = this.data.wpmCount * 60 / t[2];
+			this.data.wpm = round(this.data.wpmCount * 60 / t[2]);
 		}
 
 	}
@@ -83,7 +87,7 @@ Analysis.prototype.pushData = function(data) {
 					spacing += t2[1] - t1[2];
 				}
 				this.data.spacingCount++;
-				this.data.avgSpacing = spacing / this.data.spacingCount;
+				this.data.avgSpacing = round(spacing / this.data.spacingCount);
 			}
 		}
 	}
@@ -104,7 +108,7 @@ Analysis.prototype.popData = function(cb) {
 				spacing -= t2[1] - t1[2];
 			}
 			this.data.spacingCount--;
-			this.data.avgSpacing = spacing / this.data.spacingCount;
+			this.data.avgSpacing = round(spacing / this.data.spacingCount);
 		}
 	}
 }
