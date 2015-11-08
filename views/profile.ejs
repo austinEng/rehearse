@@ -10,32 +10,36 @@
     <% include navbar.ejs %>
     <div class="container-fluid" id="main">
       <h1><%= user.username %>'s Profile</h1>
-      <div id="stats-section" ng-controller="Stats as stats">
-            <div class="container">
-          <div class="row">
-            <div class="col-sm-6 score-category">
-              <h2>Average Clarity</h2>
-              <div class="score" id="clarity"><%= user.sessions_info.avclarity %></div>
-            </div>
-            <div class="col-sm-6 score-category">
-              <h2>Average Hesitation</h2>
-              <div class="score" id="hesitation"><%= user.sessions_info.avhesitation %></div>
-            </div>
+      <div id="stats-section" ng-controller="StatsCtrl" model=<%- JSON.stringify(user.sessions) %>>
+        <div class="container">
+        <div class="row">
+          <div class="col-sm-6 score-category">
+            <h2>Clarity</h2>
+            <div class="score" id="clarity">Average: <%= user.sessions_info.avg_clarity %></div>
+            <div id="plot_clarity"></div>
           </div>
-
-          <div class="row">
-            <div class="col-sm-6 score-category">
-              <h2>Average Words per Minute</h2>
-              <div class="score" id="wpm"><%= user.sessions_info.avwpm %></div>
-            </div>
-            <div class="col-sm-6 score-category">
-              <h2>Average Word Spacing</h2>
-              <div class="score" id="spacing"><%= user.sessions_info.avspacing %></div>
-            </div>
+          <div class="col-sm-6 score-category">
+            <h2>Hesitation</h2>
+            <div class="score" id="hesitation">Average: <%= user.sessions_info.avg_hesitation %></div>
+            <div id="plot_hesitation"></div>
           </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-6 score-category">
+            <h2>Words per Minute</h2>
+            <div class="score" id="wpm">Average: <%= user.sessions_info.avg_wpm %></div>
+            <div id="plot_wpm"></div>
+          </div>
+          <div class="col-sm-6 score-category">
+            <h2>Word Spacing</h2>
+            <div class="score" id="spacing">Average: <%= user.sessions_info.avg_spacing %></div>
+            <div id="plot_spacing"></div>
+          </div>
+        </div>
         </div>
       </div>
     </div>
     <% include scripts.ejs %>
+    <script src="https://d14fo0winaifog.cloudfront.net/plotly-basic.js"></script>
   </body>
 </html>
