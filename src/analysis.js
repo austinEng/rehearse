@@ -24,13 +24,16 @@ function Analysis() {
 Analysis.prototype.pushData = function(data) {
 	if (data.results[0].final) {
 		var content = data.results[0].alternatives[0].transcript;
-		var re = /^[^aeyiuo]+$/;
-		if (content.indexOf('%HESITATION') != -1 || re.test(content)) {
-			var t = data.results[0].alternatives[0].timestamps[0][2];
-			this.data.hesitationCount++;
+		var re = /^[^aeyiuoAEYIUO]+$/;
+		var contents = content.split(" ");
+		for (var i = 0; i < contents.length; i++) {
+			if (contents[i].indexOf('%HESITATION') != -1 || re.test(contents[i])) {
+				//var t = data.results[0].alternatives[0].timestamps[0][2];
+				this.data.hesitationCount++;
+				break;
+			}
 		}
-
-		re = /^[^aeyiuo]*$/;
+		re = /^[^aeyiuoAEYIUO]*$/;
 		var segments = data.results[0].alternatives[0].transcript.split(" ");
 		for (var i = 0; i < segments.length; i++) {
 			if(!re.test(segments[i])) {
