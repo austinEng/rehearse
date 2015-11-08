@@ -303,7 +303,150 @@ Microphone.prototype.onStopRecording =  function() {};
 Microphone.prototype.onAudio =  function() {};
 
 module.exports = Microphone;
-},{"./utils":7,"./volume-meter":8}],2:[function(require,module,exports){
+},{"./utils":8,"./volume-meter":9}],2:[function(require,module,exports){
+function Analysis() {
+	this.minClarity = -1;
+	this.maxClarity = -1;
+	this.avgClarity = -1;
+	this.clarityCount = 0;
+
+	this.wpm = -1;
+	this.wpmCount = 0;
+
+	this.minSpacing = -1;
+	this.maxSpacing = -1;
+	this.avgSpacing = -1;
+	this.spacingCount = 0;
+
+	this.hesitations = -1;
+	this.hesitationCount = 0;
+
+	this.stack = [];
+
+	this.lastDatum = null;
+}
+
+Analysis.prototype.pushData = function(data) {
+	if (data.results[0].final) {
+		var content = data.results[0].alternatives[0].transcript;
+		var re = /^[^aeyiuo]+$/;
+		if (content.indexOf('%HESITATION') != -1 || re.test(content)) {
+			var t = data.results[0].alternatives[0].timestamps[0][2];
+			this.hesitationCount++;
+		}
+
+		re = /^[^aeyiuo]*$/
+		var segments = data.results[0].alternatives[0].transcript.split(" ");
+		for (var i = 0; i < segments.length; i++) {
+			if(!re.test(segments[i])) {
+				this.wpmCount++;
+			}
+		}
+
+		var clarity = this.avgClarity * this.clarityCount;
+		clarity += data.results[0].alternatives[0].confidence;
+		this.clarityCount++;
+		this.avgClarity = clarity / this.clarityCount;
+
+		var t = data.results[0].alternatives[0].timestamps[0];
+		if (t) {
+			this.hesitations = this.hesitationCount / t[2];
+			this.wpm = this.wpmCount * 60 / t[2];
+		}
+
+	}
+
+	if (!this.lastDatum && data.results[0].alternatives[0].timestamps.length <= 1) {
+		this.lastDatum = data;
+		return;
+	}
+
+	var times;
+	if (this.lastDatum) {
+		var times1 = this.lastDatum.results[0].alternatives[0].timestamps;
+		var times2 = data.results[0].alternatives[0].timestamps;
+		times = times1.concat(times2);
+	} else {
+		times = data.results[0].alternatives[0].timestamps;
+	}
+	if (times.length > 1) {
+		for (var i = 0; i < times.length - 1; i++) {
+			var t1 = times[i];
+			var t2 = times[i+1];
+
+			if (this.spacingCount == 0) {
+				if (t2[1] - t1[2] > 0) {
+					this.avgSpacing = t2[1] - t1[2];
+					this.spacingCount++;
+				}		
+			} else {
+				var spacing = this.avgSpacing * this.spacingCount;
+				if (t2[1] - t1[2] > 0) {
+					spacing += t2[1] - t1[2];
+				}
+				this.spacingCount++;
+				this.avgSpacing = spacing / this.spacingCount;
+			}
+		}
+	}
+	this.lastDatum = data;
+	this.stack.push(data);
+}
+
+Analysis.prototype.popData = function(cb) {
+	var data = this.stack.pop();
+	this.lastDatum = this.stack[this.stack.length - 1];
+	var times = data.results[0].alternatives[0].timestamps;
+	if (times.length > 1) {
+		for (var i = 0; i < times.length - 1; i++) {
+			var t1 = times[i];
+			var t2 = times[i+1];
+			var spacing = this.avgSpacing * this.spacingCount;
+			if (t2[1] - t1[2] > 0) {
+				spacing -= t2[1] - t1[2];
+			}
+			this.spacingCount--;
+			this.avgSpacing = spacing / this.spacingCount;
+		}
+	}
+}
+
+Analysis.prototype.popNonFinal = function(cb) {
+	if (this.stack.length > 0) {
+		var datum = this.stack[this.stack.length - 1];
+		while (datum && !datum.results[0].final && this.stack.length > 0) {
+			this.popData();
+			datum = this.stack[this.stack.length - 1];
+		}
+		cb();
+	}
+	return cb();
+}
+
+Analysis.prototype.readData = function(data, cb) {
+	if (data.results[0].final) {
+		this.pushData(data);
+		cb();
+	}
+	/*console.log(this.stack.length);
+	if (data.results[0].final) {
+		var that = this;
+		this.popNonFinal(function() {
+			that.pushData(data);
+		});
+	} else {
+		var that = this;
+		this.popNonFinal(function() {
+			that.pushData(data);
+		});
+		//this.pushData(data);
+	}
+	cb();*/
+}
+
+
+module.exports = Analysis;
+},{}],3:[function(require,module,exports){
 /**
  * Copyright 2015 IBM Corp. All Rights Reserved.
  *
@@ -363,7 +506,7 @@ $(document).ready(function() {
 
 });
 
-},{"./prompt":3,"./recorder":5,"./utils":7}],3:[function(require,module,exports){
+},{"./prompt":4,"./recorder":6,"./utils":8}],4:[function(require,module,exports){
 var getRandomInt = function (min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -375,7 +518,7 @@ exports.generatePrompt = function () {
   return prompts[getRandomInt(0, prompts.length - 1)];
 };
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 
 exports.activate = function () {
 	$('#recordButton').removeClass('inactive').addClass('active');
@@ -391,10 +534,12 @@ exports.deactivate = function () {
 exports.setVolume = function (vol) {
 	$('#recordButtonAnimWrap').css('padding', vol/2 + '%');
 }
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 var Microphone = require('./Microphone');
 var initSocket = require('./socket').initSocket;
 var button = require('./recordbutton');
+
+var Analysis = require('./analysis');
 
 exports.initRecorder = function(ctx) {
 	var recordButton = $('#recordButton');
@@ -456,6 +601,7 @@ var initializeRecording = function(token, mic, callback) {
 
 	var results = [];
 	var hash = Math.random().toString(36).substring(2);
+	var analyzer = new Analysis();
 
 	function onOpen(socket) {
 	    console.log('Mic socket: opened');
@@ -475,6 +621,23 @@ var initializeRecording = function(token, mic, callback) {
 	    if (msg.results) {
 	    	console.log(msg.results[0].alternatives[0].transcript);
 	    	results.push(msg);
+	    	analyzer.readData(msg, function() {
+	    		var spacing = Math.round(1000*analyzer.avgSpacing)/1000;
+	    		if (spacing < 0) { spacing = "---"; }
+	    		$('#spacing').text(spacing);
+
+	    		var hesitation = Math.round(1000*analyzer.hesitations)/1000;
+	    		if (hesitation < 0) { hesitation = '---'; }
+	    		$('#hesitation').text(hesitation);
+
+	    		var wpm = Math.round(10*analyzer.wpm)/10;
+	    		if (wpm < 0) { wpm = '---'; }
+	    		$('#wpm').text(wpm);
+
+	    		var clarity = Math.round(10*analyzer.avgClarity)/10;
+	    		if (clarity < 0) { clarity = '---'; }
+	    		$('#clarity').text(clarity);
+	    	});
 
 	    	if (results.length > 10) {
 	    		var json = { 
@@ -523,7 +686,7 @@ var initializeRecording = function(token, mic, callback) {
 
 	initSocket(options, onOpen, onListening, onMessage, onError, onClose);
 }
-},{"./Microphone":1,"./recordbutton":4,"./socket":6}],6:[function(require,module,exports){
+},{"./Microphone":1,"./analysis":2,"./recordbutton":5,"./socket":7}],7:[function(require,module,exports){
 /**
  * Copyright 2015 IBM Corp. All Rights Reserved.
  *
@@ -649,7 +812,7 @@ var initSocket = exports.initSocket = function(options, onopen, onlistening, onm
 
 };
 
-},{"./utils":7}],7:[function(require,module,exports){
+},{"./utils":8}],8:[function(require,module,exports){
 (function (global){
 /**
  * Copyright 2015 IBM Corp. All Rights Reserved.
@@ -719,7 +882,7 @@ exports.initPubSub = function() {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 /*
 The MIT License (MIT)
 
@@ -816,4 +979,4 @@ exports.createAudioMeter = function(audioContext,clipLevel,averaging,clipLag) {
 
 	return processor;
 }
-},{}]},{},[2]);
+},{}]},{},[3]);
