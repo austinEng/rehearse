@@ -24,6 +24,7 @@ function Analysis() {
 Analysis.prototype.pushData = function(data) {
 	if (data.results[0].final) {
 		var content = data.results[0].alternatives[0].transcript;
+		var segments = content.split(" ");
 		var re = /^[^aeyiuo]+$/;
 		if (content.indexOf('%HESITATION') != -1 || re.test(content)) {
 			var t = data.results[0].alternatives[0].timestamps[0][2];
