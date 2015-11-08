@@ -1,0 +1,66 @@
+#recordButton {
+	position: relative;
+	width: 150px;
+	height: 150px;
+	background-color: #FF5858;
+	border-radius: 75px;
+	color: white;
+	margin: auto;
+	cursor: pointer;
+}
+
+#recordButton > .text {
+	position: relative;
+ 	top: 50%;
+ 	transform: translateY(-50%);
+ 	font-size: 18px;
+}
+
+#recordButtonAnimWrap {
+	position: absolute;
+	width: 100%;
+    height: 100%;
+    top: 0px;
+    left: 0px;
+}
+
+#recordButtonAnim {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	background-color: #F92E2E;
+	border-radius: 50%;
+}
+
+#recordButton.inactive #recordButtonAnim {
+	background-color: #FF7171;
+}
+
+#recordButton.inactive #recordButtonAnimWrap {
+	padding: 5%;
+}
+
+#recordButton.active #recordButtonAnim {
+	background-color: #F92E2E;
+}
+
+#recordButton.active #recordButtonAnimWrap {
+	padding: 25%;
+}
+
+
+#recordButtonAnim {
+	transition: background ease 0.3s;
+}
+
+#recordButtonAnimWrap {
+	transition: padding ease 0.3s;
+}
+
+.score-category h2 {
+	text-align: center;
+}
+.score {
+	text-align: center;
+	font-size: 50px;
+}

@@ -18,6 +18,7 @@
 'use strict';
 
 var utils = require('./utils');
+var createAudioMeter = require('./volume-meter').createAudioMeter;
 /**
  * Captures microphone input from the browser.
  * Works at least on latest versions of Firefox and Chrome
@@ -33,6 +34,7 @@ function Microphone(_options) {
   this.recording = false;
   this.requestedAccess = false;
   this.sampleRate = 16000;
+  this.volumeRead = options.volumeRead;
   // auxiliar buffer to keep unused samples (used when doing downsampling)
   this.bufferUnusedSamples = new Float32Array(0);
 
@@ -92,6 +94,9 @@ Microphone.prototype.onMediaStream =  function(stream) {
   this.recording = true;
   this.requestedAccess = false;
   this.onStartRecording();
+
+  this.meter = createAudioMeter(this.audioContext, 0.98, 0);
+  audioInput.connect(this.meter);
 };
 
 /**
@@ -109,7 +114,7 @@ Microphone.prototype._onaudioprocess = function(data) {
   var chan = data.inputBuffer.getChannelData(0);
 
   //resampler(this.audioContext.sampleRate,data.inputBuffer,this.onAudio);
-
+  this.volumeRead(this.meter.volume);
   this.onAudio(this._exportDataBufferTo16Khz(new Float32Array(chan)));
 
   //export with microphone mhz, remember to update the this.sampleRate
@@ -298,7 +303,7 @@ Microphone.prototype.onStopRecording =  function() {};
 Microphone.prototype.onAudio =  function() {};
 
 module.exports = Microphone;
-},{"./utils":6}],2:[function(require,module,exports){
+},{"./utils":7,"./volume-meter":8}],2:[function(require,module,exports){
 /**
  * Copyright 2015 IBM Corp. All Rights Reserved.
  *
@@ -358,7 +363,7 @@ $(document).ready(function() {
 
 });
 
-},{"./prompt":3,"./recorder":4,"./utils":6}],3:[function(require,module,exports){
+},{"./prompt":3,"./recorder":5,"./utils":7}],3:[function(require,module,exports){
 var getRandomInt = function (min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -371,17 +376,39 @@ exports.generatePrompt = function () {
 };
 
 },{}],4:[function(require,module,exports){
+
+exports.activate = function () {
+	$('#recordButton').removeClass('inactive').addClass('active');
+	$('#recordButton .text').text('Stop');
+}
+
+exports.deactivate = function () {
+	$('#recordButton').removeClass('active').addClass('inactive');
+	$('#recordButtonAnimWrap').css('padding', '');
+	$('#recordButton .text').text('Record');
+}
+
+exports.setVolume = function (vol) {
+	$('#recordButtonAnimWrap').css('padding', vol/2 + '%');
+}
+},{}],5:[function(require,module,exports){
 var Microphone = require('./Microphone');
 var initSocket = require('./socket').initSocket;
+var button = require('./recordbutton');
 
 exports.initRecorder = function(ctx) {
 	var recordButton = $('#recordButton');
+
+	var volumeRead = function(volume) {
+		button.setVolume(80*(1 - Math.sqrt(Math.sqrt(volume))));
+	};
 
 	recordButton.click((function() {
 		var running = false;
 	    var token = ctx.token;
 	    var micOptions = {
-	    	bufferSize: ctx.buffersize
+	    	bufferSize: ctx.buffersize,
+	    	volumeRead: volumeRead
 	    };
 	    var mic = new Microphone(micOptions);
 
@@ -393,10 +420,12 @@ exports.initRecorder = function(ctx) {
 	    				console.log("Couldn't start recorder");
 	    				console.log('Error: ' + err.message);
 	    				running = false;
+	    				button.deactivate();
 	    			} else {
 	    				console.log("Starting record");
 			    		mic.record();
 			    		running = true;
+			    		button.activate();
 	    			}
 	    		});
 	    	} else {
@@ -404,6 +433,7 @@ exports.initRecorder = function(ctx) {
 	    		$.publish('hardsocketstop');
 	    		mic.stop();
 	    		running = false;
+	    		button.deactivate();
 	    	}
 	    }
 	})());
@@ -446,7 +476,7 @@ var initializeRecording = function(token, mic, callback) {
 	    	console.log(msg.results[0].alternatives[0].transcript);
 	    	results.push(msg);
 
-	    	if (results.length > 0) {
+	    	if (results.length > 10) {
 	    		var json = { 
 		    		hash: hash,
 		    		data: results,
@@ -485,7 +515,7 @@ var initializeRecording = function(token, mic, callback) {
 	    	contentType: 'application/json',
 	    	data: JSON.stringify(json),
 	    	success: function(data) {
-
+    			console.log(data);
 	    	}
 	    });
 	    console.log('Mic socket close: ', evt);
@@ -493,7 +523,7 @@ var initializeRecording = function(token, mic, callback) {
 
 	initSocket(options, onOpen, onListening, onMessage, onError, onClose);
 }
-},{"./Microphone":1,"./socket":5}],5:[function(require,module,exports){
+},{"./Microphone":1,"./recordbutton":4,"./socket":6}],6:[function(require,module,exports){
 /**
  * Copyright 2015 IBM Corp. All Rights Reserved.
  *
@@ -619,7 +649,7 @@ var initSocket = exports.initSocket = function(options, onopen, onlistening, onm
 
 };
 
-},{"./utils":6}],6:[function(require,module,exports){
+},{"./utils":7}],7:[function(require,module,exports){
 (function (global){
 /**
  * Copyright 2015 IBM Corp. All Rights Reserved.
@@ -689,4 +719,101 @@ exports.initPubSub = function() {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],8:[function(require,module,exports){
+/*
+The MIT License (MIT)
+
+Copyright (c) 2014 Chris Wilson
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+/*
+
+Usage:
+audioNode = createAudioMeter(audioContext,clipLevel,averaging,clipLag);
+
+audioContext: the AudioContext you're using.
+clipLevel: the level (0 to 1) that you would consider "clipping".
+   Defaults to 0.98.
+averaging: how "smoothed" you would like the meter to be over time.
+   Should be between 0 and less than 1.  Defaults to 0.95.
+clipLag: how long you would like the "clipping" indicator to show
+   after clipping has occured, in milliseconds.  Defaults to 750ms.
+
+Access the clipping through node.checkClipping(); use node.shutdown to get rid of it.
+*/
+
+var volumeAudioProcess = function( event ) {
+	var buf = event.inputBuffer.getChannelData(0);
+    var bufLength = buf.length;
+	var sum = 0;
+    var x;
+
+	// Do a root-mean-square on the samples: sum up the squares...
+    for (var i=0; i<bufLength; i++) {
+    	x = buf[i];
+    	if (Math.abs(x)>=this.clipLevel) {
+    		this.clipping = true;
+    		this.lastClip = window.performance.now();
+    	}
+    	sum += x * x;
+    }
+
+    // ... then take the square root of the sum.
+    var rms =  Math.sqrt(sum / bufLength);
+
+    // Now smooth this out with the averaging factor applied
+    // to the previous sample - take the max here because we
+    // want "fast attack, slow release."
+    this.volume = Math.max(rms, this.volume*this.averaging);
+}
+
+exports.createAudioMeter = function(audioContext,clipLevel,averaging,clipLag) {
+	var processor = audioContext.createScriptProcessor(512);
+	processor.onaudioprocess = volumeAudioProcess;
+	processor.clipping = false;
+	processor.lastClip = 0;
+	processor.volume = 0;
+	processor.clipLevel = clipLevel || 0.98;
+	processor.averaging = averaging || 0.95;
+	processor.clipLag = clipLag || 750;
+
+	// this will have no effect, since we don't copy the input to the output,
+	// but works around a current Chrome bug.
+	processor.connect(audioContext.destination);
+
+	processor.checkClipping =
+		function(){
+			if (!this.clipping)
+				return false;
+			if ((this.lastClip + this.clipLag) < window.performance.now())
+				this.clipping = false;
+			return this.clipping;
+		};
+
+	processor.shutdown =
+		function(){
+			this.disconnect();
+			this.onaudioprocess = null;
+		};
+
+	return processor;
+}
 },{}]},{},[2]);
