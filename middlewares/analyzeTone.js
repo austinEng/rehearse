@@ -23,6 +23,7 @@ var analyzeTone = function (req, res, next) {
         next(error);
       } else {
         console.log(data);
+        var tone; 
         var tone.emotion_tone.cheerfulness = req.children[0].children[0].normalized_score;
         var tone.emotion_tone.negative = req.children[0].children[1].normalized_score;
         var tone.emotion_tone.anger = req.children[0].children[2].normalized_score;
@@ -42,7 +43,7 @@ var analyzeTone = function (req, res, next) {
                 tone.writing_tone.confident + tone.writing_tone.tentative)/total;
         var tone.social_tone.score = (tone.social_tone.openness + 
         tone.social_tone.agreeableness + tone.social_tone.conscientiousness)/total;
-
+        res.speech_data.tone_data = tone; 
       }
     });
   }
