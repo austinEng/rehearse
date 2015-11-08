@@ -27,7 +27,7 @@ router.get('/about', function (req, res) {
 });   
 
 router.get('/profile', router.isAuthenticated, function (req, res) {
-  var sessions = user.session
+  var sessions = req.user.sessions
   var avwpm = 0;
   var avhesitation = 0;
   var avclarity = 0;
